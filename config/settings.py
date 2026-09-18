@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      # SGOT apps
     "apps.accounts.apps.AccountsConfig",
+    "apps.customers.apps.CustomersConfig",    
 ]
 
 MIDDLEWARE = [

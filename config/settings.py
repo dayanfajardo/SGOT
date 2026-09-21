@@ -50,6 +50,7 @@ INSTALLED_APPS = [
      # SGOT apps
     "apps.accounts.apps.AccountsConfig",
     "apps.customers.apps.CustomersConfig",    
+    "apps.catalog.apps.CatalogConfig",
 ]
 
 MIDDLEWARE = [

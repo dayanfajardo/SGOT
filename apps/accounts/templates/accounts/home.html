@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>SGOT</title>
+</head>
+<body>
+    <h1>SGOT</h1>
+    <p>Bienvenido, {{ request.user }}</p>
+
+    <h2>Grupos</h2>
+    <ul>
+        {% for group in request.user.groups.all %}
+            <li>{{ group.name }}</li>
+        {% empty %}
+            <li>Sin grupos asignados</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Cerrar sesión</button>
+    </form>
+</body>
+</html>

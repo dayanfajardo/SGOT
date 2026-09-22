@@ -100,6 +100,9 @@ class WorkOrder(models.Model):
             models.Index(fields=["received_date"]),
             models.Index(fields=["scheduled_date"]),
         ]
+        permissions = [
+            ("schedule_workorder", "Puede programar órdenes de trabajo"),
+        ]
 
     def __str__(self):
         return f"OT {self.number} - {self.customer}"

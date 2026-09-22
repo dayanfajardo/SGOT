@@ -35,6 +35,40 @@ def _create_history(
 
 
 @transaction.atomic
+def create_work_order(
+    *,
+    number,
+    customer,
+    commercial,
+    work_type,
+    received_date,
+    created_by,
+    installation_address="",
+    notes="",
+):
+    work_order = WorkOrder.objects.create(
+        number=number,
+        customer=customer,
+        commercial=commercial,
+        work_type=work_type,
+        received_date=received_date,
+        created_by=created_by,
+        installation_address=installation_address,
+        notes=notes,
+    )
+
+    _create_history(
+        work_order=work_order,
+        actor=created_by,
+        event_type=WorkOrderHistory.EventType.CREATED,
+        description=f"Se creó la OT {work_order.number}.",
+        previous_value="",
+        new_value=WorkOrder.Status.RECEIVED,
+    )
+    return work_order
+
+
+@transaction.atomic
 def change_status(*, work_order, new_status, actor):
     current_status = work_order.status
 

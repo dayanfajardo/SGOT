@@ -10,6 +10,7 @@ from apps.workorders.models import WorkOrder, WorkOrderHistory
 from apps.workorders.services import (
     change_status,
     complete_work_order,
+    create_work_order,
     schedule_work_order,
     start_installation,
 )
@@ -66,6 +67,24 @@ class WorkOrderServiceTests(TestCase):
             scheduled_date=scheduled_date,
             received_date=date(2026, 9, 21),
             created_by=self.user,
+        )
+
+    def _create_work_order_via_service(
+        self,
+        *,
+        number="9001",
+        installation_address="",
+        notes="",
+    ):
+        return create_work_order(
+            number=number,
+            customer=self.customer,
+            commercial=self.user,
+            work_type=self.work_type,
+            received_date=date(2026, 9, 21),
+            created_by=self.user,
+            installation_address=installation_address,
+            notes=notes,
         )
 
     # change_status
@@ -486,3 +505,78 @@ class WorkOrderServiceTests(TestCase):
                 work_order=work_order,
                 actor=self.user,
             )
+
+    # create_work_order
+
+    def test_create_work_order_creates_order(self):
+        work_order = self._create_work_order_via_service()
+
+        self.assertTrue(
+            WorkOrder.objects.filter(pk=work_order.pk).exists()
+        )
+
+    def test_create_work_order_uses_received_status(self):
+        work_order = self._create_work_order_via_service()
+
+        work_order.refresh_from_db()
+
+        self.assertEqual(
+            work_order.status,
+            WorkOrder.Status.RECEIVED,
+        )
+
+    def test_create_work_order_persists_fields(self):
+        installation_address = "Calle 10 #20-30"
+        notes = "Notas de la OT"
+
+        work_order = self._create_work_order_via_service(
+            number="9001",
+            installation_address=installation_address,
+            notes=notes,
+        )
+
+        work_order.refresh_from_db()
+
+        self.assertEqual(work_order.number, "9001")
+        self.assertEqual(work_order.customer, self.customer)
+        self.assertEqual(work_order.commercial, self.user)
+        self.assertEqual(work_order.work_type, self.work_type)
+        self.assertEqual(work_order.received_date, date(2026, 9, 21))
+        self.assertEqual(work_order.created_by, self.user)
+        self.assertEqual(
+            work_order.installation_address,
+            installation_address,
+        )
+        self.assertEqual(work_order.notes, notes)
+
+    def test_create_work_order_creates_exactly_one_history(self):
+        work_order = self._create_work_order_via_service()
+
+        self.assertEqual(
+            WorkOrderHistory.objects.filter(work_order=work_order).count(),
+            1,
+        )
+
+    def test_create_work_order_creates_history(self):
+        work_order = self._create_work_order_via_service(number="9001")
+
+        history = WorkOrderHistory.objects.get(work_order=work_order)
+
+        self.assertEqual(
+            history.event_type,
+            WorkOrderHistory.EventType.CREATED,
+        )
+        self.assertEqual(history.user, self.user)
+        self.assertEqual(history.previous_value, "")
+        self.assertEqual(
+            history.new_value,
+            WorkOrder.Status.RECEIVED,
+        )
+        self.assertIn(work_order.number, history.description)
+
+    def test_create_work_order_returns_persisted_order(self):
+        work_order = self._create_work_order_via_service()
+
+        persisted = WorkOrder.objects.get(pk=work_order.pk)
+
+        self.assertEqual(work_order, persisted)

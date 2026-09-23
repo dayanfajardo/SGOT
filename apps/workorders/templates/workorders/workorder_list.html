@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Órdenes de trabajo{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header">
+        <h1>Órdenes de trabajo</h1>
+        <p>Consulta y seguimiento de órdenes registradas</p>
+    </header>
+
+    <section class="sgot-card">
+        {% if work_orders %}
+        <div class="table-responsive">
+            <table class="sgot-table">
+                <thead>
+                    <tr>
+                        <th>Número OT</th>
+                        <th>Cliente</th>
+                        <th>Comercial</th>
+                        <th>Tipo de trabajo</th>
+                        <th>Estado</th>
+                        <th>Técnico</th>
+                        <th>Fecha recibida</th>
+                        <th>Fecha programada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for work_order in work_orders %}
+                    <tr>
+                        <td>{{ work_order.number }}</td>
+                        <td>{{ work_order.customer }}</td>
+                        <td>{{ work_order.commercial }}</td>
+                        <td>{{ work_order.work_type }}</td>
+                        <td>
+                            <span class="sgot-badge sgot-badge-{{ work_order.status|lower }}">
+                                {{ work_order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{% if work_order.assigned_technician %}{{ work_order.assigned_technician }}{% else %}—{% endif %}</td>
+                        <td>{{ work_order.received_date }}</td>
+                        <td>{% if work_order.scheduled_date %}{{ work_order.scheduled_date }}{% else %}—{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay órdenes de trabajo para mostrar.</p>
+        {% endif %}
+    </section>
+{% endblock %}

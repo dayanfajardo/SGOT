@@ -1,0 +1,254 @@
+:root {
+    --bg: #0B0E14;
+    --surface: #141821;
+    --surface-elevated: #1B202C;
+    --border: #252B38;
+    --primary: #6C5CE7;
+    --primary-hover: #7D6FF0;
+    --secondary: #22D3EE;
+    --text: #F1F3F8;
+    --text-muted: #9AA3B5;
+    --text-disabled: #5C6373;
+    --sidebar-width: 248px;
+    --radius: 10px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.sgot-app {
+    min-height: 100vh;
+}
+
+.sgot-sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem;
+}
+
+.sgot-brand {
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.75rem 1.25rem;
+}
+
+.sgot-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.sgot-nav-item {
+    display: block;
+    border-radius: var(--radius);
+    padding: 0.6rem 0.75rem;
+    color: var(--text-muted);
+}
+
+a.sgot-nav-item:hover {
+    background: var(--surface-elevated);
+    color: var(--text);
+}
+
+.sgot-nav-item.is-active {
+    background: var(--surface-elevated);
+    color: var(--text);
+    box-shadow: inset 2px 0 0 var(--primary);
+}
+
+.sgot-nav-item.is-disabled {
+    color: var(--text-disabled);
+    cursor: default;
+}
+
+.sgot-shell {
+    min-width: 0;
+}
+
+.sgot-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    min-height: 64px;
+    padding: 0.75rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.sgot-user {
+    color: var(--text-muted);
+}
+
+.sgot-btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-elevated);
+    color: var(--text);
+    padding: 0.4rem 0.85rem;
+    font: inherit;
+    cursor: pointer;
+}
+
+.sgot-btn:hover {
+    border-color: var(--primary-hover);
+    color: var(--text);
+}
+
+.sgot-main {
+    padding: 1.5rem;
+}
+
+.sgot-page-header {
+    margin-bottom: 1.25rem;
+}
+
+.sgot-page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.45rem;
+    font-weight: 600;
+}
+
+.sgot-page-header p {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.sgot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.sgot-empty {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.sgot-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    color: var(--text);
+}
+
+.sgot-table thead th {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-elevated);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.sgot-table tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.sgot-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.sgot-table tbody tr:hover td {
+    background: var(--surface-elevated);
+}
+
+.sgot-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.sgot-badge-received {
+    background: rgba(154, 163, 181, 0.16);
+    color: #C4CAD6;
+}
+
+.sgot-badge-pending_equipment {
+    background: rgba(108, 92, 231, 0.16);
+    color: #B7AEF5;
+}
+
+.sgot-badge-equipment_ok {
+    background: rgba(34, 211, 238, 0.14);
+    color: #67E4F5;
+}
+
+.sgot-badge-in_installation {
+    background: rgba(245, 158, 11, 0.16);
+    color: #F5C56B;
+}
+
+.sgot-badge-completed {
+    background: rgba(34, 197, 94, 0.16);
+    color: #4ADE80;
+}
+
+@media (min-width: 992px) {
+    .sgot-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        overflow-y: auto;
+    }
+
+    .sgot-shell {
+        margin-left: var(--sidebar-width);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .sgot-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sgot-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .sgot-nav-item.is-active {
+        box-shadow: inset 0 -2px 0 var(--primary);
+    }
+}

@@ -1,0 +1,76 @@
+---
+description: Core product and business context for SGOT
+alwaysApply: true
+---
+
+# SGOT Project Overview
+
+SGOT is an internal web application for managing work orders, technical scheduling, and warehouse outputs for a security/electronics company.
+
+## Purpose
+
+SGOT complements existing physical documents and SIIGO.
+
+It does NOT replace:
+- SIIGO inventory
+- quotations
+- billing
+- supplier management
+- physical work orders
+- physical warehouse output documents
+
+## Main roles
+
+- Administrador / Almacén
+- Comercial
+- Jefe Técnica
+- Gerencia
+
+Technicians do not log into SGOT in V1.
+
+## Responsibilities
+
+### Administrador / Almacén
+- Registers work orders received physically.
+- Selects the commercial advisor associated with the work order.
+- Manages customers, products, technicians and work types.
+- Creates warehouse outputs.
+- Registers delivered and returned materials.
+- Handles operational workflow.
+
+### Comercial
+- Does NOT create work orders in SGOT.
+- Can view only their own work orders.
+- Can monitor status, assigned technician and scheduling information.
+
+### Jefe Técnica
+- Can view work orders.
+- Can assign/reassign technician and scheduled date.
+- Must not have unrestricted permission to edit the entire work order.
+
+### Gerencia
+- Read-only access to operational information and future dashboards.
+
+## Work order workflow
+
+Valid statuses:
+
+1. RECEIVED
+2. PENDING_EQUIPMENT
+3. EQUIPMENT_OK
+4. IN_INSTALLATION
+5. COMPLETED
+
+Do not invent additional statuses unless explicitly requested.
+
+## Important business rules
+
+- A physical OT already exists before SGOT registration.
+- Warehouse registers the OT after receiving it.
+- One OT can contain multiple products/equipment.
+- One OT can require multiple installation visits but remains the same OT.
+- One OT can have at most one WarehouseOutput.
+- Original requested quantities must remain available for traceability.
+- Warehouse used quantity is calculated as delivered quantity minus returned quantity.
+- Products/materials not originally included in the OT may appear in the warehouse output.
+- SIIGO remains the inventory and billing source of truth.

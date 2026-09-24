@@ -1,0 +1,95 @@
+---
+description: Django coding standards and UI conventions for SGOT
+globs:
+  - "**/*.py"
+  - "**/*.html"
+alwaysApply: false
+---
+
+# Django and Code Style
+
+## Language
+
+Use English for:
+- Python class names
+- function names
+- variables
+- model field names
+- URLs and internal identifiers when practical
+
+Use Spanish for:
+- user-facing labels
+- validation messages
+- verbose_name
+- template text
+- interface copy
+
+## Django conventions
+
+Prefer explicit and readable Django code.
+
+Do not over-engineer.
+
+Use:
+- ModelForm for model-backed forms
+- inlineformset_factory for parent/detail forms when appropriate
+- login_required for authenticated views
+- PermissionDenied when an authenticated user lacks required permissions
+- transaction.atomic for multi-step operations that must succeed or fail together
+
+## Queries
+
+Use select_related or prefetch_related when the template accesses related objects repeatedly.
+
+Avoid obvious N+1 query patterns.
+
+## Forms
+
+Do not expose system-managed fields unnecessarily.
+
+Examples of fields that generally should not be manually editable during WorkOrder creation:
+- status
+- assigned_technician
+- scheduled_date
+- installation_started_at
+- completed_at
+- created_by
+- timestamps
+
+created_by should normally come from request.user.
+
+## Permissions
+
+Do not confuse permission scope with object scope.
+
+Example:
+- Comercial may have view_workorder.
+- The queryset must still restrict them to WorkOrder.objects.filter(commercial=request.user).
+
+Do not give broad change_workorder permission to Jefe Técnica merely to allow scheduling.
+Use the custom schedule_workorder permission.
+
+## Templates
+
+All application pages should extend the shared base template when appropriate.
+
+Maintain the current SGOT dark design language.
+
+Primary colors:
+- background: #0B0E14
+- surface: #141821
+- elevated surface: #1B202C
+- border: #252B38
+- primary: #6C5CE7
+- primary hover: #7D6FF0
+- secondary: #22D3EE
+- primary text: #F1F3F8
+- muted text: #9AA3B5
+
+Avoid:
+- excessive gradients
+- exaggerated shadows
+- generic landing-page styling
+- inline CSS unless unavoidable
+
+SGOT should look like professional internal business software.

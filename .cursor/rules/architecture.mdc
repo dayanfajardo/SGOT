@@ -1,0 +1,80 @@
+---
+description: Architecture and technical decisions for SGOT
+alwaysApply: true
+---
+
+# SGOT Architecture
+
+## Architecture style
+
+SGOT is a modular monolith.
+
+Do not introduce microservices unless explicitly requested.
+
+Current Django modules:
+
+- apps/accounts
+- apps/customers
+- apps/catalog
+- apps/workorders
+- apps/warehouse
+
+## Technology stack
+
+- Python 3.12
+- Django 5.2
+- PostgreSQL
+- Django Templates
+- Bootstrap 5 where useful
+- Custom CSS in static/css/sgot.css
+- Docker and Docker Compose
+- Git and GitHub
+
+Do not introduce React, Vue, REST APIs, Celery, Redis or other infrastructure unless explicitly requested.
+
+## Domain boundaries
+
+Keep business domains separated by Django apps.
+
+Avoid moving unrelated logic between apps.
+
+## Service layer
+
+Business operations belong in services.py.
+
+Examples:
+- create_work_order
+- change_status
+- schedule_work_order
+- start_installation
+- complete_work_order
+- create_warehouse_output
+- add_output_item
+- update_returned_quantity
+
+Views should remain thin.
+
+Views should:
+- authenticate users
+- check permissions
+- validate forms
+- call services
+- return responses
+
+Do not duplicate business rules inside views if an appropriate service exists.
+
+## Database integrity
+
+Use database constraints when appropriate for structural invariants.
+
+Use service validation for business rules involving multiple models or workflow state.
+
+Do not remove existing constraints without explicit justification.
+
+## Relationships
+
+Use settings.AUTH_USER_MODEL for user relationships.
+
+Use PROTECT for historical/business records when deleting the referenced object would damage traceability.
+
+Use CASCADE only for true dependent records such as detail rows belonging exclusively to a parent document.

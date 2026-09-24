@@ -1,0 +1,85 @@
+---
+description: Development workflow and safety rules for SGOT
+alwaysApply: true
+---
+
+# SGOT Development Workflow
+
+## Scope discipline
+
+Modify only the files required by the current task.
+
+Do not modify unrelated files.
+
+Do not invent additional features, fields, models, dependencies or business rules unless explicitly requested.
+
+Before making edits, briefly explain what will be changed.
+
+## Incremental development
+
+Work in small steps.
+
+Preferred order:
+
+1. Define behavior/design.
+2. Implement the smallest required change.
+3. Run django check.
+4. Review generated code.
+5. Run targeted tests.
+6. Run full test suite.
+7. Commit only after tests pass.
+
+Do not generate migrations unless the task actually changes model state and migration creation has been requested or is clearly necessary.
+
+## Tests
+
+Existing tests must continue to pass.
+
+Add tests for:
+- business rules
+- permissions
+- role-based visibility
+- service behavior
+- important database constraints
+
+Do not delete or weaken tests just to make a change pass.
+
+## Git
+
+Use feature branches.
+
+Keep main stable.
+
+Use meaningful commits such as:
+
+- feat: ...
+- fix: ...
+- test: ...
+- refactor: ...
+
+Do not merge automatically unless explicitly requested.
+
+## Cursor behavior
+
+Do not rewrite entire files unnecessarily.
+
+Preserve existing architecture and naming.
+
+Do not replace working code with a new architecture without explicit approval.
+
+When uncertain about a business rule, ask instead of inventing.
+
+When a service already exists, prefer using it instead of bypassing it with direct model creation.
+
+## SGOT scope
+
+Do not add:
+- SIIGO integration
+- full inventory management
+- supplier management
+- billing
+- technician login
+- mobile app
+- microservices
+
+unless explicitly requested.

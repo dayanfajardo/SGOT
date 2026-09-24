@@ -9,6 +9,9 @@
     --text: #F1F3F8;
     --text-muted: #9AA3B5;
     --text-disabled: #5C6373;
+    --danger: #F87171;
+    --danger-bg: rgba(248, 113, 113, 0.1);
+    --danger-border: rgba(248, 113, 113, 0.35);
     --sidebar-width: 248px;
     --radius: 10px;
 }
@@ -106,6 +109,9 @@ a.sgot-nav-item:hover {
 
 .sgot-btn {
     appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--surface-elevated);
@@ -118,6 +124,18 @@ a.sgot-nav-item:hover {
 .sgot-btn:hover {
     border-color: var(--primary-hover);
     color: var(--text);
+}
+
+.sgot-btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.sgot-btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #fff;
 }
 
 .sgot-main {
@@ -144,6 +162,25 @@ a.sgot-nav-item:hover {
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
+}
+
+.sgot-card-header {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-elevated);
+}
+
+.sgot-card-header h2 {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.sgot-card-body {
+    padding: 1.25rem;
 }
 
 .sgot-empty {
@@ -222,6 +259,288 @@ a.sgot-nav-item:hover {
     color: #4ADE80;
 }
 
+.sgot-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.sgot-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.sgot-field-wide {
+    grid-column: 1 / -1;
+}
+
+.sgot-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.sgot-form input[type="text"],
+.sgot-form input[type="number"],
+.sgot-form input[type="date"],
+.sgot-form input[type="email"],
+.sgot-form select,
+.sgot-form textarea {
+    width: 100%;
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    padding: 0.55rem 0.75rem;
+    font: inherit;
+    color-scheme: dark;
+}
+
+.sgot-form textarea {
+    height: 6.5rem;
+    resize: vertical;
+}
+
+.sgot-form input:focus,
+.sgot-form select:focus,
+.sgot-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.22);
+}
+
+.sgot-form input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--primary);
+}
+
+.sgot-field-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+.sgot-form .errorlist {
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--danger);
+    font-size: 0.8125rem;
+}
+
+.sgot-form-errors {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius);
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.sgot-form-errors:last-child {
+    margin-bottom: 0;
+}
+
+.sgot-form-errors .errorlist {
+    margin: 0;
+}
+
+.sgot-table .sgot-col-qty {
+    width: 10rem;
+}
+
+.sgot-table .sgot-col-delete {
+    width: 7.5rem;
+}
+
+.sgot-formset-delete {
+    display: none;
+}
+
+.sgot-formset-toolbar {
+    padding: 0.85rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface-elevated);
+}
+
+.sgot-btn-row-remove {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/* Tom Select — Equipos / productos
+   CDN tom-select.css loads after this file, so control/input/dropdown
+   rules use extra specificity (and !important only where the CDN does). */
+.sgot-form .ts-wrapper {
+    width: 100%;
+    min-width: 12rem;
+}
+
+.sgot-form .ts-wrapper .ts-control,
+.sgot-form .ts-wrapper.single .ts-control,
+.sgot-form .ts-wrapper.single.input-active .ts-control,
+.sgot-form .ts-wrapper.multi .ts-control {
+    display: flex;
+    align-items: center;
+    min-height: calc(1.5em + 1.1rem + 2px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    background-color: var(--bg);
+    color: var(--text);
+    padding: 0.55rem 0.75rem;
+    box-shadow: none;
+    font: inherit;
+    line-height: 1.5;
+    color-scheme: dark;
+}
+
+.sgot-form .ts-wrapper.focus .ts-control,
+.sgot-form .ts-wrapper.input-active .ts-control,
+.sgot-form .ts-wrapper.focus.input-active .ts-control {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.22);
+}
+
+.ts-control > input,
+.ts-wrapper .ts-control input,
+.ts-wrapper.focus .ts-control input,
+.ts-wrapper.input-active .ts-control input,
+.ts-control input[type="text"],
+.sgot-form .ts-wrapper .ts-control > input,
+.sgot-form .ts-wrapper .ts-control input,
+.sgot-form .ts-wrapper.focus .ts-control input,
+.sgot-form .ts-wrapper.input-active .ts-control input,
+.sgot-form .ts-control input[type="text"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--text) !important;
+    caret-color: #F1F3F8 !important;
+    font: inherit;
+    font-size: 0.9375rem !important;
+    line-height: 1.5 !important;
+    height: 1.5em !important;
+    min-height: 1.5em !important;
+    color-scheme: dark;
+    -webkit-text-fill-color: var(--text);
+}
+
+.ts-control > input::placeholder,
+.ts-wrapper .ts-control input::placeholder,
+.sgot-form .ts-wrapper .ts-control > input::placeholder,
+.sgot-form .ts-wrapper .ts-control input::placeholder {
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
+}
+
+.ts-control > input:-webkit-autofill,
+.ts-control > input:-webkit-autofill:hover,
+.ts-control > input:-webkit-autofill:focus,
+.ts-wrapper .ts-control input:-webkit-autofill,
+.ts-wrapper.focus .ts-control input:-webkit-autofill,
+.ts-wrapper.input-active .ts-control input:-webkit-autofill,
+.ts-control input[type="text"]:-webkit-autofill {
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+}
+
+.sgot-form .ts-wrapper .ts-control .item {
+    color: var(--text);
+}
+
+.sgot-form .ts-wrapper.single .ts-control:after {
+    border-color: var(--text-muted) transparent transparent transparent;
+}
+
+.sgot-form .ts-wrapper.single.dropdown-active .ts-control:after {
+    border-color: transparent transparent var(--text-muted) transparent;
+}
+
+.ts-dropdown,
+.ts-dropdown.plugin-dropdown_input,
+.ts-dropdown.single {
+    background: #141821 !important;
+    background-color: #141821 !important;
+    border: 1px solid #252B38 !important;
+    border-radius: var(--radius);
+    color: #F1F3F8 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+}
+
+.ts-dropdown .ts-dropdown-content {
+    background: #141821 !important;
+    background-color: #141821 !important;
+}
+
+.ts-dropdown .option,
+.ts-dropdown .no-results {
+    background: #141821 !important;
+    background-color: #141821 !important;
+    color: #F1F3F8 !important;
+    padding: 0.45rem 0.75rem;
+}
+
+.ts-dropdown .no-results {
+    color: #9AA3B5 !important;
+}
+
+.ts-dropdown .option.selected {
+    background: #1B202C !important;
+    background-color: #1B202C !important;
+    color: #F1F3F8 !important;
+}
+
+.ts-dropdown .option.active,
+.ts-dropdown .option:hover,
+.ts-dropdown .active {
+    background: #7D6FF0 !important;
+    background-color: #7D6FF0 !important;
+    color: #F1F3F8 !important;
+}
+
+.ts-dropdown .highlight {
+    background: rgba(108, 92, 231, 0.28);
+    color: inherit;
+    border-radius: 2px;
+}
+
+.sgot-form .sgot-table input[type="text"],
+.sgot-form .sgot-table input[type="number"],
+.sgot-form .sgot-table select {
+    min-width: 8rem;
+}
+
+.sgot-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sgot-form-actions .sgot-btn {
+    padding: 0.5rem 1.1rem;
+}
+
+@media (min-width: 768px) {
+    .sgot-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 @media (min-width: 992px) {
     .sgot-sidebar {
         position: fixed;
@@ -252,3 +571,4 @@ a.sgot-nav-item:hover {
         box-shadow: inset 0 -2px 0 var(--primary);
     }
 }
+

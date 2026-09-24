@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva orden de trabajo{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css">
+
+    <header class="sgot-page-header">
+        <h1>Nueva orden de trabajo</h1>
+        <p>Registra una orden recibida en almacén</p>
+    </header>
+
+    <form method="post" class="sgot-form">
+        {% csrf_token %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                {% if form.non_field_errors %}
+                <div class="sgot-form-errors" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label for="{{ form.number.id_for_label }}">{{ form.number.label }}</label>
+                        {{ form.number }}
+                        {{ form.number.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.customer.id_for_label }}">{{ form.customer.label }}</label>
+                        {{ form.customer }}
+                        {{ form.customer.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.commercial.id_for_label }}">{{ form.commercial.label }}</label>
+                        {{ form.commercial }}
+                        {{ form.commercial.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.work_type.id_for_label }}">{{ form.work_type.label }}</label>
+                        {{ form.work_type }}
+                        {{ form.work_type.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.received_date.id_for_label }}">{{ form.received_date.label }}</label>
+                        {{ form.received_date }}
+                        {{ form.received_date.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.installation_address.id_for_label }}">{{ form.installation_address.label }}</label>
+                        {{ form.installation_address }}
+                        {{ form.installation_address.errors }}
+                    </div>
+                    <div class="sgot-field sgot-field-wide">
+                        <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {{ form.notes.errors }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Equipos / productos</h2>
+            </header>
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}
+            <div class="sgot-card-body">
+                <div class="sgot-form-errors" role="alert">
+                    {{ formset.non_form_errors }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="sgot-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th class="sgot-col-qty">Cantidad solicitada</th>
+                            <th>Notas</th>
+                            <th class="sgot-col-delete"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-formset-body">
+                        {% for item_form in formset %}
+                        <tr>
+                            <td>
+                                {{ item_form.id }}
+                                {% if item_form.non_field_errors %}
+                                <div class="sgot-form-errors" role="alert">
+                                    {{ item_form.non_field_errors }}
+                                </div>
+                                {% endif %}
+                                {{ item_form.product }}
+                                {{ item_form.product.errors }}
+                            </td>
+                            <td>
+                                {{ item_form.requested_quantity }}
+                                {{ item_form.requested_quantity.errors }}
+                            </td>
+                            <td>
+                                {{ item_form.notes }}
+                                {{ item_form.notes.errors }}
+                            </td>
+                            <td>
+                                <span class="sgot-formset-delete">{{ item_form.DELETE }}</span>
+                                <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="sgot-formset-toolbar">
+                <button type="button" class="sgot-btn" id="add-item-row">+ Agregar producto</button>
+            </div>
+        </section>
+
+        <template id="empty-item-form">
+            <tr data-dynamic-row>
+                <td>
+                    {{ formset.empty_form.id }}
+                    {{ formset.empty_form.product }}
+                </td>
+                <td>
+                    {{ formset.empty_form.requested_quantity }}
+                </td>
+                <td>
+                    {{ formset.empty_form.notes }}
+                </td>
+                <td>
+                    <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
+                </td>
+            </tr>
+        </template>
+
+        <div class="sgot-form-actions">
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar orden</button>
+            <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn">Cancelar</a>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+    <script>
+    (function () {
+        const tbody = document.getElementById("item-formset-body");
+        const emptyTemplate = document.getElementById("empty-item-form");
+        const addButton = document.getElementById("add-item-row");
+        const totalFormsInput = document.querySelector("input[name$='-TOTAL_FORMS']");
+
+        if (!tbody || !emptyTemplate || !addButton || !totalFormsInput) {
+            return;
+        }
+
+        const prefix = totalFormsInput.name.replace(/-TOTAL_FORMS$/, "");
+        const indexPattern = new RegExp("(" + prefix + "-)\\d+");
+
+        function updateElementIndex(el, index) {
+            if (el.name) {
+                el.name = el.name.replace(indexPattern, "$1" + index);
+            }
+            if (el.id) {
+                el.id = el.id.replace(indexPattern, "$1" + index);
+            }
+            if (el.htmlFor) {
+                el.htmlFor = el.htmlFor.replace(indexPattern, "$1" + index);
+            }
+        }
+
+        function getProductSelect(row) {
+            return row.querySelector("select[name$='-product']");
+        }
+
+        function destroyProductSelect(row) {
+            const select = getProductSelect(row);
+            if (select && select.tomselect) {
+                select.tomselect.destroy();
+            }
+        }
+
+        function initProductSelect(selectEl) {
+            if (!selectEl || selectEl.tomselect) {
+                return;
+            }
+            const emptyOption = selectEl.querySelector('option[value=""]');
+            if (emptyOption) {
+                emptyOption.textContent = "";
+            }
+            new TomSelect(selectEl, {
+                placeholder: "Buscar producto...",
+                allowEmptyOption: true,
+                create: false,
+                maxOptions: null,
+                sortField: { field: "text", direction: "asc" },
+                dropdownParent: "body",
+            });
+        }
+
+        function initRowProductSelect(row) {
+            if (!row) {
+                return;
+            }
+            initProductSelect(getProductSelect(row));
+        }
+
+        function reindexRows() {
+            const rows = tbody.querySelectorAll("tr");
+            rows.forEach(function (row, index) {
+                destroyProductSelect(row);
+                row.querySelectorAll("input, select, textarea, label, button").forEach(function (el) {
+                    updateElementIndex(el, index);
+                });
+                initRowProductSelect(row);
+            });
+            totalFormsInput.value = String(rows.length);
+        }
+
+        function markExistingRowDeleted(row) {
+            let deleteInput = row.querySelector("input[name$='-DELETE']");
+            if (!deleteInput) {
+                const named = row.querySelector("[name^='" + prefix + "-']");
+                if (named && named.name) {
+                    deleteInput = document.createElement("input");
+                    deleteInput.type = "hidden";
+                    deleteInput.name = named.name.replace(/-[^-]+$/, "-DELETE");
+                    row.appendChild(deleteInput);
+                }
+            }
+            if (deleteInput) {
+                deleteInput.checked = true;
+                deleteInput.value = "on";
+            }
+            row.hidden = true;
+        }
+
+        tbody.querySelectorAll("tr").forEach(initRowProductSelect);
+
+        addButton.addEventListener("click", function () {
+            const index = parseInt(totalFormsInput.value, 10);
+            const html = emptyTemplate.innerHTML.replaceAll("__prefix__", String(index));
+            tbody.insertAdjacentHTML("beforeend", html);
+            totalFormsInput.value = String(index + 1);
+            initRowProductSelect(tbody.lastElementChild);
+        });
+
+        tbody.addEventListener("click", function (event) {
+            const removeButton = event.target.closest(".js-remove-item-row");
+            if (!removeButton) {
+                return;
+            }
+            const row = removeButton.closest("tr");
+            if (!row) {
+                return;
+            }
+            if (row.hasAttribute("data-dynamic-row")) {
+                destroyProductSelect(row);
+                row.remove();
+                reindexRows();
+            } else {
+                markExistingRowDeleted(row);
+            }
+        });
+    })();
+    </script>
+{% endblock %}

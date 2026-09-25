@@ -3,9 +3,11 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.catalog.models import Technician, WorkType
 from apps.customers.models import Customer
+from apps.warehouse.models import WarehouseOutput
 from apps.workorders.models import WorkOrder, WorkOrderHistory
 from apps.workorders.services import (
     change_status,
@@ -85,6 +87,17 @@ class WorkOrderServiceTests(TestCase):
             created_by=self.user,
             installation_address=installation_address,
             notes=notes,
+        )
+
+    def _create_warehouse_output(self, work_order, *, number="5256", reconciled=False):
+        return WarehouseOutput.objects.create(
+            number=number,
+            work_order=work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.user,
+            reconciled_at=timezone.now() if reconciled else None,
+            reconciled_by=self.user if reconciled else None,
         )
 
     # change_status
@@ -451,6 +464,7 @@ class WorkOrderServiceTests(TestCase):
         work_order = self._create_work_order(
             status=WorkOrder.Status.IN_INSTALLATION
         )
+        self._create_warehouse_output(work_order, reconciled=True)
 
         complete_work_order(
             work_order=work_order,
@@ -468,6 +482,7 @@ class WorkOrderServiceTests(TestCase):
         work_order = self._create_work_order(
             status=WorkOrder.Status.IN_INSTALLATION
         )
+        self._create_warehouse_output(work_order, reconciled=True)
 
         complete_work_order(
             work_order=work_order,
@@ -482,22 +497,47 @@ class WorkOrderServiceTests(TestCase):
         work_order = self._create_work_order(
             status=WorkOrder.Status.IN_INSTALLATION
         )
+        self._create_warehouse_output(work_order, reconciled=True)
 
         complete_work_order(
             work_order=work_order,
             actor=self.user,
         )
 
-        self.assertTrue(
-            WorkOrderHistory.objects.filter(
-                work_order=work_order,
-                event_type=WorkOrderHistory.EventType.COMPLETED,
-            ).exists()
+        history = WorkOrderHistory.objects.get(
+            work_order=work_order,
+            event_type=WorkOrderHistory.EventType.COMPLETED,
+        )
+
+        self.assertEqual(history.user, self.user)
+        self.assertEqual(
+            history.previous_value,
+            WorkOrder.Status.IN_INSTALLATION,
+        )
+        self.assertEqual(
+            history.new_value,
+            WorkOrder.Status.COMPLETED,
         )
 
     def test_cannot_complete_work_order_from_invalid_status(self):
         work_order = self._create_work_order(
             status=WorkOrder.Status.EQUIPMENT_OK
+        )
+        self._create_warehouse_output(work_order, reconciled=True)
+
+        with self.assertRaises(ValidationError):
+            complete_work_order(
+                work_order=work_order,
+                actor=self.user,
+            )
+
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.status, WorkOrder.Status.EQUIPMENT_OK)
+        self.assertIsNone(work_order.completed_at)
+
+    def test_cannot_complete_without_warehouse_output(self):
+        work_order = self._create_work_order(
+            status=WorkOrder.Status.IN_INSTALLATION
         )
 
         with self.assertRaises(ValidationError):
@@ -505,6 +545,26 @@ class WorkOrderServiceTests(TestCase):
                 work_order=work_order,
                 actor=self.user,
             )
+
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.status, WorkOrder.Status.IN_INSTALLATION)
+        self.assertIsNone(work_order.completed_at)
+
+    def test_cannot_complete_with_unreconciled_output(self):
+        work_order = self._create_work_order(
+            status=WorkOrder.Status.IN_INSTALLATION
+        )
+        self._create_warehouse_output(work_order, reconciled=False)
+
+        with self.assertRaises(ValidationError):
+            complete_work_order(
+                work_order=work_order,
+                actor=self.user,
+            )
+
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.status, WorkOrder.Status.IN_INSTALLATION)
+        self.assertIsNone(work_order.completed_at)
 
     # create_work_order
 

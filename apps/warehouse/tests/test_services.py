@@ -11,6 +11,7 @@ from apps.warehouse.models import WarehouseOutput, WarehouseOutputItem
 from apps.warehouse.services import (
     add_output_item,
     create_warehouse_output,
+    reconcile_warehouse_output,
     update_returned_quantity,
 )
 from apps.workorders.models import WorkOrder, WorkOrderItem
@@ -375,3 +376,105 @@ class UpdateReturnedQuantityServiceTests(TestCase):
 
         self.assertEqual(self.item.returned_quantity, Decimal("4.00"))
         self.assertEqual(self.item.used_quantity, Decimal("0.00"))
+
+
+class ReconcileWarehouseOutputServiceTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="almacen.conciliacion")
+        self.customer = Customer.objects.create(trade_name="Andes Seguridad")
+        self.work_type = WorkType.objects.create(name="Instalación alarma")
+        self.technician = Technician.objects.create(
+            first_name="Carlos",
+            last_name="Pérez",
+            technician_type=Technician.TechnicianType.STAFF,
+        )
+        self.work_order = WorkOrder.objects.create(
+            number="9303",
+            customer=self.customer,
+            commercial=self.user,
+            work_type=self.work_type,
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            assigned_technician=self.technician,
+            received_date=date(2026, 9, 16),
+            created_by=self.user,
+        )
+        self.product = Product.objects.create(
+            name="Sirena exterior",
+            product_type=Product.ProductType.EQUIPMENT,
+            unit=Product.Unit.UNIT,
+        )
+        self.output = create_warehouse_output(
+            number="5400",
+            work_order=self.work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.user,
+        )
+        self.item = add_output_item(
+            warehouse_output=self.output,
+            product=self.product,
+            delivered_quantity=Decimal("4.00"),
+        )
+        update_returned_quantity(
+            output_item=self.item,
+            returned_quantity=Decimal("1.50"),
+        )
+        self.work_order.status = WorkOrder.Status.IN_INSTALLATION
+        self.work_order.save()
+
+    def test_reconciles_output_for_in_installation_order(self):
+        result = reconcile_warehouse_output(
+            warehouse_output=self.output,
+            actor=self.user,
+        )
+        self.output.refresh_from_db()
+
+        self.assertIs(result, self.output)
+        self.assertIsNotNone(self.output.reconciled_at)
+        self.assertEqual(self.output.reconciled_by, self.user)
+
+    def test_does_not_modify_item_quantities(self):
+        reconcile_warehouse_output(
+            warehouse_output=self.output,
+            actor=self.user,
+        )
+        self.item.refresh_from_db()
+
+        self.assertEqual(self.item.delivered_quantity, Decimal("4.00"))
+        self.assertEqual(self.item.returned_quantity, Decimal("1.50"))
+
+    def test_rejects_already_reconciled_output(self):
+        reconcile_warehouse_output(
+            warehouse_output=self.output,
+            actor=self.user,
+        )
+        self.output.refresh_from_db()
+        reconciled_at = self.output.reconciled_at
+        reconciled_by = self.output.reconciled_by
+
+        with self.assertRaises(ValidationError):
+            reconcile_warehouse_output(
+                warehouse_output=self.output,
+                actor=self.user,
+            )
+
+        self.output.refresh_from_db()
+        self.assertEqual(self.output.reconciled_at, reconciled_at)
+        self.assertEqual(self.output.reconciled_by, reconciled_by)
+
+    def test_rejects_order_that_is_not_in_installation(self):
+        self.work_order.status = WorkOrder.Status.EQUIPMENT_OK
+        self.work_order.save()
+
+        with self.assertRaises(ValidationError):
+            reconcile_warehouse_output(
+                warehouse_output=self.output,
+                actor=self.user,
+            )
+
+        self.output.refresh_from_db()
+        self.item.refresh_from_db()
+        self.assertIsNone(self.output.reconciled_at)
+        self.assertIsNone(self.output.reconciled_by)
+        self.assertEqual(self.item.delivered_quantity, Decimal("4.00"))
+        self.assertEqual(self.item.returned_quantity, Decimal("1.50"))

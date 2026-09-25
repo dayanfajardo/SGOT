@@ -67,7 +67,7 @@
             </div>
         </section>
 
-        {% if schedule_form or status_form or can_start_installation or start_installation_error %}
+        {% if schedule_form or status_form or can_start_installation or start_installation_error or can_complete_work_order or complete_work_order_error %}
         <section class="sgot-card">
             <header class="sgot-card-header">
                 <h2>Acciones</h2>
@@ -76,6 +76,13 @@
                 {% if start_installation_error %}
                 <div class="sgot-form-errors" role="alert">
                     {% for message in start_installation_error %}
+                    <p class="mb-0">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if complete_work_order_error %}
+                <div class="sgot-form-errors" role="alert">
+                    {% for message in complete_work_order_error %}
                     <p class="mb-0">{{ message }}</p>
                     {% endfor %}
                 </div>
@@ -131,6 +138,15 @@
                         {% csrf_token %}
                         <div class="sgot-form-actions">
                             <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar instalación</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    {% if can_complete_work_order %}
+                    <form method="post" action="{% url 'workorders:workorder_complete' work_order.pk %}" class="sgot-form sgot-action-form">
+                        {% csrf_token %}
+                        <div class="sgot-form-actions">
+                            <button type="submit" class="sgot-btn sgot-btn-primary">Completar orden</button>
                         </div>
                     </form>
                     {% endif %}

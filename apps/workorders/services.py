@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.warehouse.models import WarehouseOutput
+
 from .models import WorkOrder, WorkOrderHistory
 
 ALLOWED_STATUS_TRANSITIONS = {
@@ -198,6 +200,18 @@ def complete_work_order(*, work_order, actor):
     if work_order.status != WorkOrder.Status.IN_INSTALLATION:
         raise ValidationError(
             "Solo se puede completar una orden que está en instalación."
+        )
+
+    try:
+        warehouse_output = work_order.warehouse_output
+    except WarehouseOutput.DoesNotExist:
+        raise ValidationError(
+            "La orden debe tener una salida de almacén antes de completarse."
+        )
+
+    if warehouse_output.reconciled_at is None:
+        raise ValidationError(
+            "La salida de almacén debe estar conciliada antes de completar la orden."
         )
 
     previous_status = work_order.status

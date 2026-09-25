@@ -43,6 +43,19 @@ class WarehouseOutput(models.Model):
         "fecha de actualización",
         auto_now=True,
     )
+    reconciled_at = models.DateTimeField(
+        "fecha de conciliación",
+        null=True,
+        blank=True,
+    )
+    reconciled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="reconciled_warehouse_outputs",
+        verbose_name="conciliado por",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Salida de almacén"

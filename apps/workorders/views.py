@@ -13,6 +13,7 @@ from apps.workorders.forms import (
 from apps.workorders.models import WorkOrder
 from apps.workorders.services import (
     change_status,
+    complete_work_order,
     create_work_order,
     schedule_work_order,
     start_installation,
@@ -86,6 +87,7 @@ def work_order_detail(request, pk):
         "work_type",
         "assigned_technician",
         "created_by",
+        "warehouse_output",
     ).prefetch_related(
         "items__product",
         "history__user",
@@ -119,6 +121,15 @@ def _ensure_detail_action_forms(request, work_order, context):
             and work_order.status == WorkOrder.Status.EQUIPMENT_OK
             and work_order.assigned_technician_id
             and work_order.scheduled_date
+        )
+
+    if "can_complete_work_order" not in context:
+        warehouse_output = getattr(work_order, "warehouse_output", None)
+        context["can_complete_work_order"] = (
+            request.user.has_perm("workorders.change_workorder")
+            and work_order.status == WorkOrder.Status.IN_INSTALLATION
+            and warehouse_output is not None
+            and warehouse_output.reconciled_at is not None
         )
 
 
@@ -205,6 +216,29 @@ def work_order_start_installation(request, pk):
             request,
             work_order,
             {"start_installation_error": exc.messages},
+        )
+
+    return redirect("workorders:workorder_detail", pk=work_order.pk)
+
+
+@login_required
+@require_POST
+def work_order_complete(request, pk):
+    if not request.user.has_perm("workorders.change_workorder"):
+        raise PermissionDenied
+
+    work_order = get_object_or_404(WorkOrder, pk=pk)
+
+    try:
+        complete_work_order(
+            work_order=work_order,
+            actor=request.user,
+        )
+    except ValidationError as exc:
+        return _render_work_order_detail(
+            request,
+            work_order,
+            {"complete_work_order_error": exc.messages},
         )
 
     return redirect("workorders:workorder_detail", pk=work_order.pk)

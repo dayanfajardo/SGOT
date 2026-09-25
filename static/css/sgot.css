@@ -535,8 +535,24 @@ a.sgot-nav-item:hover {
     padding: 0.5rem 1.1rem;
 }
 
+.sgot-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.sgot-action-form h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
 @media (min-width: 768px) {
     .sgot-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sgot-actions-grid {
         grid-template-columns: 1fr 1fr;
     }
 }

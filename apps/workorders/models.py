@@ -7,8 +7,8 @@ class WorkOrder(models.Model):
 
     class Status(models.TextChoices):
         RECEIVED = "RECEIVED", "Recibida"
-        PENDING_EQUIPMENT = "PENDING_EQUIPMENT", "Pdte. llegada de equipos"
-        EQUIPMENT_OK = "EQUIPMENT_OK", "Equipos OK"
+        PENDING_EQUIPMENT = "PENDING_EQUIPMENT", "Pendiente por pedido con proveedor"
+        EQUIPMENT_OK = "EQUIPMENT_OK", "Equipos completos para instalación"
         IN_INSTALLATION = "IN_INSTALLATION", "En instalación"
         COMPLETED = "COMPLETED", "Completada"
 

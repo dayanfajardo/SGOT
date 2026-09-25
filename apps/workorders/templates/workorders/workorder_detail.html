@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}OT {{ work_order.number }}{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header d-flex justify-content-between align-items-start gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h1>OT {{ work_order.number }}</h1>
+                <span class="sgot-badge sgot-badge-{{ work_order.status|lower }}">
+                    {{ work_order.get_status_display }}
+                </span>
+            </div>
+            <p>{{ work_order.customer }}</p>
+        </div>
+        <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn">Volver a órdenes</a>
+    </header>
+
+    <div class="d-flex flex-column gap-3">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label>Comercial</label>
+                        <p class="mb-0">{{ work_order.commercial }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Tipo de trabajo</label>
+                        <p class="mb-0">{{ work_order.work_type }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Fecha recibida</label>
+                        <p class="mb-0">{{ work_order.received_date }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Dirección de instalación</label>
+                        <p class="mb-0">{{ work_order.installation_address|default:"—" }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Técnico asignado</label>
+                        <p class="mb-0">{{ work_order.assigned_technician|default:"—" }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Fecha programada</label>
+                        <p class="mb-0">{{ work_order.scheduled_date|default:"—" }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Fecha inicio de instalación</label>
+                        <p class="mb-0">{{ work_order.installation_started_at|default:"—" }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Fecha completada</label>
+                        <p class="mb-0">{{ work_order.completed_at|default:"—" }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Creada por</label>
+                        <p class="mb-0">{{ work_order.created_by }}</p>
+                    </div>
+                    <div class="sgot-field sgot-field-wide">
+                        <label>Notas</label>
+                        <p class="mb-0">{{ work_order.notes|default:"—" }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% if schedule_form or status_form or can_start_installation or start_installation_error %}
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Acciones</h2>
+            </header>
+            <div class="sgot-card-body">
+                {% if start_installation_error %}
+                <div class="sgot-form-errors" role="alert">
+                    {% for message in start_installation_error %}
+                    <p class="mb-0">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="sgot-actions-grid">
+                    {% if status_form %}
+                    <form method="post" action="{% url 'workorders:workorder_change_status' work_order.pk %}" class="sgot-form sgot-action-form">
+                        {% csrf_token %}
+                        <h3>Actualizar estado</h3>
+                        {% if status_form.non_field_errors %}
+                        <div class="sgot-form-errors" role="alert">
+                            {{ status_form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        <div class="sgot-field">
+                            <label for="{{ status_form.new_status.id_for_label }}">{{ status_form.new_status.label }}</label>
+                            {{ status_form.new_status }}
+                            {{ status_form.new_status.errors }}
+                        </div>
+                        <div class="sgot-form-actions">
+                            <button type="submit" class="sgot-btn sgot-btn-primary">Actualizar estado</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    {% if schedule_form %}
+                    <form method="post" action="{% url 'workorders:workorder_schedule' work_order.pk %}" class="sgot-form sgot-action-form">
+                        {% csrf_token %}
+                        <h3>Programación técnica</h3>
+                        {% if schedule_form.non_field_errors %}
+                        <div class="sgot-form-errors" role="alert">
+                            {{ schedule_form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        <div class="sgot-field">
+                            <label for="{{ schedule_form.technician.id_for_label }}">{{ schedule_form.technician.label }}</label>
+                            {{ schedule_form.technician }}
+                            {{ schedule_form.technician.errors }}
+                        </div>
+                        <div class="sgot-field">
+                            <label for="{{ schedule_form.scheduled_date.id_for_label }}">{{ schedule_form.scheduled_date.label }}</label>
+                            {{ schedule_form.scheduled_date }}
+                            {{ schedule_form.scheduled_date.errors }}
+                        </div>
+                        <div class="sgot-form-actions">
+                            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar programación</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    {% if can_start_installation %}
+                    <form method="post" action="{% url 'workorders:workorder_start_installation' work_order.pk %}" class="sgot-form sgot-action-form">
+                        {% csrf_token %}
+                        <div class="sgot-form-actions">
+                            <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar instalación</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Productos / equipos</h2>
+            </header>
+            {% if work_order.items.all %}
+            <div class="table-responsive">
+                <table class="sgot-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad solicitada</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in work_order.items.all %}
+                        <tr>
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.requested_quantity }}</td>
+                            <td>{{ item.notes|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="sgot-empty">No hay productos ni equipos registrados en esta orden.</p>
+            {% endif %}
+        </section>
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Historial</h2>
+            </header>
+            {% if work_order.history.all %}
+            <div class="table-responsive">
+                <table class="sgot-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha / hora</th>
+                            <th>Tipo de evento</th>
+                            <th>Usuario</th>
+                            <th>Descripción</th>
+                            <th>Valor anterior</th>
+                            <th>Valor nuevo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in work_order.history.all %}
+                        <tr>
+                            <td>{{ entry.created_at }}</td>
+                            <td>{{ entry.get_event_type_display }}</td>
+                            <td>{{ entry.user }}</td>
+                            <td>{{ entry.description }}</td>
+                            <td>{{ entry.previous_value|default:"—" }}</td>
+                            <td>{{ entry.new_value|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="sgot-empty">No hay eventos registrados en esta orden.</p>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

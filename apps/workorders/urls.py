@@ -11,4 +11,24 @@ urlpatterns = [
         views.work_order_create,
         name="workorder_create",
     ),
+    path(
+        "workorders/<int:pk>/",
+        views.work_order_detail,
+        name="workorder_detail",
+    ),
+    path(
+        "workorders/<int:pk>/schedule/",
+        views.work_order_schedule,
+        name="workorder_schedule",
+    ),
+    path(
+        "workorders/<int:pk>/status/",
+        views.work_order_change_status,
+        name="workorder_change_status",
+    ),
+    path(
+        "workorders/<int:pk>/start-installation/",
+        views.work_order_start_installation,
+        name="workorder_start_installation",
+    ),
 ]

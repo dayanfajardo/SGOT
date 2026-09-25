@@ -27,7 +27,9 @@
                 <tbody>
                     {% for work_order in work_orders %}
                     <tr>
-                        <td>{{ work_order.number }}</td>
+                        <td>
+                            <a href="{% url 'workorders:workorder_detail' work_order.pk %}" style="color: var(--secondary);">{{ work_order.number }}</a>
+                        </td>
                         <td>{{ work_order.customer }}</td>
                         <td>{{ work_order.commercial }}</td>
                         <td>{{ work_order.work_type }}</td>

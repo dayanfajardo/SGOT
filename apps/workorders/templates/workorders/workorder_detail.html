@@ -187,6 +187,101 @@
 
         <section class="sgot-card">
             <header class="sgot-card-header">
+                <h2>Salida de almacén</h2>
+            </header>
+            {% if warehouse_output %}
+            <div class="sgot-card-body">
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label>Número</label>
+                        <p class="mb-0">{{ warehouse_output.number }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Técnico</label>
+                        <p class="mb-0">{{ warehouse_output.technician }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Fecha de salida</label>
+                        <p class="mb-0">{{ warehouse_output.output_date }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Creado por</label>
+                        <p class="mb-0">{{ warehouse_output.created_by }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Estado de conciliación</label>
+                        <p class="mb-0">
+                            {% if warehouse_output.reconciled_at %}
+                            <span class="sgot-badge sgot-badge-completed">Conciliada</span>
+                            {% else %}
+                            <span class="sgot-badge sgot-badge-pending_equipment">Pendiente de conciliación</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if warehouse_output.reconciled_at %}
+                    <div class="sgot-field">
+                        <label>Fecha de conciliación</label>
+                        <p class="mb-0">{{ warehouse_output.reconciled_at }}</p>
+                    </div>
+                    <div class="sgot-field">
+                        <label>Conciliado por</label>
+                        <p class="mb-0">{{ warehouse_output.reconciled_by }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="sgot-field sgot-field-wide">
+                        <label>Notas</label>
+                        <p class="mb-0">{{ warehouse_output.notes|default:"—" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% if warehouse_output.items.all %}
+            <div class="table-responsive">
+                <table class="sgot-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Ítem de OT</th>
+                            <th>Cantidad entregada</th>
+                            <th>Cantidad devuelta</th>
+                            <th>Cantidad utilizada</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in warehouse_output.items.all %}
+                        <tr>
+                            <td>{{ item.product }}</td>
+                            <td>
+                                {% if item.work_order_item %}
+                                {{ item.work_order_item }}
+                                {% else %}
+                                Adicional
+                                {% endif %}
+                            </td>
+                            <td>{{ item.delivered_quantity }}</td>
+                            <td>{{ item.returned_quantity }}</td>
+                            <td>{{ item.used_quantity }}</td>
+                            <td>{{ item.notes|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="sgot-empty">No hay ítems registrados en esta salida.</p>
+            {% endif %}
+            {% else %}
+            <div class="sgot-empty-action">
+                <p>Esta orden aún no tiene una salida de almacén.</p>
+                {% if can_create_warehouse_output %}
+                <a href="{% url 'warehouse:warehouse_output_create' work_order.pk %}" class="sgot-btn sgot-btn-primary">Crear salida de almacén</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
                 <h2>Historial</h2>
             </header>
             {% if work_order.history.all %}

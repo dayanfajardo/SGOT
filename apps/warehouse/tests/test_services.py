@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.catalog.models import Product, Technician, WorkType
 from apps.customers.models import Customer
@@ -376,6 +377,24 @@ class UpdateReturnedQuantityServiceTests(TestCase):
 
         self.assertEqual(self.item.returned_quantity, Decimal("4.00"))
         self.assertEqual(self.item.used_quantity, Decimal("0.00"))
+
+    def test_rejects_update_when_output_is_reconciled(self):
+        update_returned_quantity(
+            output_item=self.item,
+            returned_quantity=Decimal("1.50"),
+        )
+        self.output.reconciled_at = timezone.now()
+        self.output.reconciled_by = self.user
+        self.output.save()
+
+        with self.assertRaises(ValidationError):
+            update_returned_quantity(
+                output_item=self.item,
+                returned_quantity=Decimal("2.00"),
+            )
+
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.returned_quantity, Decimal("1.50"))
 
 
 class ReconcileWarehouseOutputServiceTests(TestCase):

@@ -52,7 +52,7 @@ def create_warehouse_output(
 def add_output_item(
     *,
     warehouse_output,
-    product,
+    product=None,
     delivered_quantity,
     work_order_item=None,
     notes="",
@@ -60,13 +60,21 @@ def add_output_item(
     if delivered_quantity <= 0:
         raise ValidationError("La cantidad entregada debe ser mayor que cero.")
 
+    if work_order_item is None and product is None:
+        raise ValidationError(
+            "Debe indicar un ítem de orden de trabajo o un producto/"
+            "material adicional."
+        )
+
     if work_order_item is not None:
         if work_order_item.work_order_id != warehouse_output.work_order_id:
             raise ValidationError(
                 "El ítem debe pertenecer a la misma orden de trabajo de la salida."
             )
 
-        if work_order_item.product_id != product.pk:
+        if product is None:
+            product = work_order_item.product
+        elif work_order_item.product_id != product.pk:
             raise ValidationError(
                 "El producto debe coincidir con el producto del ítem de la orden."
             )
@@ -82,6 +90,11 @@ def add_output_item(
 
 @transaction.atomic
 def update_returned_quantity(*, output_item, returned_quantity):
+    if output_item.warehouse_output.reconciled_at is not None:
+        raise ValidationError(
+            "No se pueden modificar devoluciones de una salida ya conciliada."
+        )
+
     if returned_quantity < 0:
         raise ValidationError("La cantidad devuelta no puede ser negativa.")
 

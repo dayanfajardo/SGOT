@@ -190,6 +190,20 @@ a.sgot-nav-item:hover {
     text-align: center;
 }
 
+.sgot-empty-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 1.25rem;
+}
+
+.sgot-empty-action p {
+    margin: 0;
+    color: var(--text-muted);
+    text-align: center;
+}
+
 .sgot-table {
     width: 100%;
     margin: 0;
@@ -357,8 +371,17 @@ a.sgot-nav-item:hover {
     width: 10rem;
 }
 
+.sgot-table .sgot-col-wo-item {
+    width: 16rem;
+    min-width: 12rem;
+}
+
 .sgot-table .sgot-col-delete {
     width: 7.5rem;
+}
+
+.sgot-form select option:disabled {
+    color: var(--text-disabled);
 }
 
 .sgot-formset-delete {

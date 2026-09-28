@@ -88,9 +88,15 @@ def work_order_detail(request, pk):
         "assigned_technician",
         "created_by",
         "warehouse_output",
+        "warehouse_output__technician",
+        "warehouse_output__created_by",
+        "warehouse_output__reconciled_by",
     ).prefetch_related(
         "items__product",
         "history__user",
+        "warehouse_output__items__product",
+        "warehouse_output__items__work_order_item",
+        "warehouse_output__items__work_order_item__product",
     )
 
     if request.user.groups.filter(name="Comercial").exists():
@@ -123,8 +129,20 @@ def _ensure_detail_action_forms(request, work_order, context):
             and work_order.scheduled_date
         )
 
+    if "warehouse_output" not in context:
+        context["warehouse_output"] = getattr(work_order, "warehouse_output", None)
+
+    warehouse_output = context["warehouse_output"]
+
+    if "can_create_warehouse_output" not in context:
+        context["can_create_warehouse_output"] = (
+            request.user.has_perm("warehouse.add_warehouseoutput")
+            and work_order.status == WorkOrder.Status.EQUIPMENT_OK
+            and work_order.assigned_technician_id is not None
+            and warehouse_output is None
+        )
+
     if "can_complete_work_order" not in context:
-        warehouse_output = getattr(work_order, "warehouse_output", None)
         context["can_complete_work_order"] = (
             request.user.has_perm("workorders.change_workorder")
             and work_order.status == WorkOrder.Status.IN_INSTALLATION

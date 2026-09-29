@@ -308,28 +308,30 @@
             <header class="sgot-card-header">
                 <h2>Historial</h2>
             </header>
-            {% if work_order.history.all %}
+            {% if history_entries %}
             <div class="table-responsive">
-                <table class="sgot-table">
+                <table class="sgot-table sgot-history-table">
                     <thead>
                         <tr>
-                            <th>Fecha / hora</th>
-                            <th>Tipo de evento</th>
-                            <th>Usuario</th>
-                            <th>Descripción</th>
-                            <th>Valor anterior</th>
-                            <th>Valor nuevo</th>
+                            <th class="sgot-col-when">Fecha / hora</th>
+                            <th class="sgot-col-event">Tipo de evento</th>
+                            <th class="sgot-col-user">Usuario</th>
+                            <th class="sgot-col-desc">Descripción</th>
+                            <th class="sgot-col-value">Valor anterior</th>
+                            <th class="sgot-col-value">Valor nuevo</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for entry in work_order.history.all %}
+                        {% for entry in history_entries %}
                         <tr>
-                            <td>{{ entry.created_at }}</td>
-                            <td>{{ entry.get_event_type_display }}</td>
-                            <td>{{ entry.user }}</td>
-                            <td>{{ entry.description }}</td>
-                            <td>{{ entry.previous_value|default:"—" }}</td>
-                            <td>{{ entry.new_value|default:"—" }}</td>
+                            <td class="sgot-col-when">{{ entry.created_at }}</td>
+                            <td class="sgot-col-event">
+                                <span class="sgot-badge sgot-badge-event">{{ entry.event_type_label }}</span>
+                            </td>
+                            <td class="sgot-col-user">{{ entry.user }}</td>
+                            <td class="sgot-col-desc">{{ entry.description }}</td>
+                            <td class="sgot-col-value">{{ entry.previous_value }}</td>
+                            <td class="sgot-col-value">{{ entry.new_value }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

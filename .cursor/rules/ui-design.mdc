@@ -1,0 +1,452 @@
+---
+description: UI/UX and visual design rules for SGOT
+globs:
+  - "templates/**/*.html"
+  - "apps/**/templates/**/*.html"
+  - "static/css/**/*.css"
+  - "static/js/**/*.js"
+alwaysApply: false
+---
+
+# SGOT UI/UX Design System
+
+SGOT is an internal operational application. Its interface must feel professional,
+calm, modern, efficient and information-dense without becoming visually heavy.
+
+The visual direction is inspired by high-quality productivity applications such as
+Linear, but SGOT must maintain its own identity. Do not copy another product's
+interface pixel-for-pixel.
+
+## Core design principles
+
+- Prioritize clarity, usability and information hierarchy over decoration.
+- Keep the interface visually calm and consistent.
+- Reduce unnecessary visual noise.
+- Use whitespace intentionally.
+- Prefer subtle borders and surface contrast over heavy shadows.
+- Important operational information must be easy to scan.
+- Actions must have an obvious hierarchy.
+- Do not sacrifice readability for visual effects.
+- Keep interactions predictable across the entire application.
+
+## Typography
+
+Use Inter Variable as the primary SGOT typeface.
+
+Preferred font stack:
+
+`"Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+
+Typography should use a limited and intentional set of weights.
+
+Recommended use:
+
+- 400: normal body text
+- 450–500: UI labels and secondary emphasis
+- 550–600: buttons, navigation and important labels
+- 600–650: headings
+
+Avoid excessive bold text.
+
+Use tabular numbers where useful for:
+- quantities
+- OT numbers
+- dates where alignment benefits readability
+- reports and numeric tables
+
+Do not use multiple decorative font families.
+
+## Themes
+
+SGOT must support two first-class visual themes:
+
+1. Light
+2. Classic Dark
+
+Both themes must have the same hierarchy, spacing and component behavior.
+
+Do not build the dark theme by simply inverting the light theme.
+
+Define theme values through reusable CSS custom properties.
+
+Examples of semantic tokens:
+
+- `--bg-app`
+- `--bg-sidebar`
+- `--bg-surface`
+- `--bg-surface-elevated`
+- `--bg-hover`
+- `--border-default`
+- `--border-subtle`
+- `--text-primary`
+- `--text-secondary`
+- `--text-muted`
+- `--accent`
+- `--accent-hover`
+- `--success`
+- `--warning`
+- `--danger`
+- `--info`
+- `--shadow-sm`
+- `--shadow-md`
+
+Components must use semantic variables instead of hard-coded light/dark colors.
+
+A visual component should not need separate markup for light and dark themes.
+
+## Color
+
+Use a restrained neutral palette.
+
+SGOT should use color primarily for:
+
+- status
+- feedback
+- primary actions
+- selected navigation
+- meaningful operational information
+
+Do not use bright colors merely as decoration.
+
+Status colors must remain understandable in both themes.
+
+Never rely on color alone to communicate critical state.
+
+## Layout
+
+Use a persistent application shell consisting of:
+
+- sidebar navigation
+- top/application header where useful
+- main content area
+
+The sidebar should be visually quieter than the main working area.
+
+The current section must be immediately recognizable.
+
+Keep content widths comfortable on large displays while allowing data tables to
+use the available horizontal space.
+
+Avoid excessive empty space in operational screens.
+
+## Spacing
+
+Use a consistent spacing scale instead of arbitrary values.
+
+Preferred rhythm:
+
+- 4px
+- 8px
+- 12px
+- 16px
+- 20px
+- 24px
+- 32px
+- 40px
+
+Do not introduce random margins or padding when an existing spacing token can be
+used.
+
+## Borders and radius
+
+Use restrained border radii.
+
+Recommended hierarchy:
+
+- inputs / small controls: 6–8px
+- buttons: 6–8px
+- cards / panels: 10–12px
+- overlays / dropdowns: 10–14px
+
+Avoid excessive pill-shaped components except where appropriate for:
+- status badges
+- filters
+- compact selectors
+
+Borders should normally be subtle.
+
+## Glassmorphism
+
+Glassmorphism is an accent technique, not the base SGOT visual language.
+
+It may be used for contextual floating surfaces such as:
+
+- dropdown menus
+- command/search panels
+- popovers
+- floating filter panels
+- modals
+- compact contextual action menus
+
+Typical treatment may include:
+
+- translucent surface
+- `backdrop-filter: blur(...)`
+- subtle border
+- soft shadow
+
+Do NOT use glassmorphism for:
+
+- primary page backgrounds
+- large content cards
+- data tables
+- long forms
+- normal information panels
+
+Always provide sufficient opaque fallback/background contrast.
+
+Readability and accessibility take priority over transparency effects.
+
+## Cards and surfaces
+
+Cards should be used to group related information, not merely to decorate the
+page.
+
+Prefer:
+
+- subtle surface contrast
+- light border
+- clear heading hierarchy
+
+Avoid stacking many nested cards.
+
+Important actions may appear in a card header when they apply to the entire
+section.
+
+For example, actions such as:
+
+- Registrar devoluciones
+- Conciliar salida
+- Programar
+- Completar orden
+
+should normally be visually grouped as actions rather than displayed as ordinary
+data fields.
+
+## Tables
+
+Operational tables are a primary SGOT component.
+
+Tables must prioritize scanning and density.
+
+Use:
+
+- clear but subtle column headers
+- adequate row height
+- subtle row separators
+- hover state
+- consistent numeric alignment
+- status badges
+- responsive horizontal scrolling when necessary
+
+Do not make every table cell visually boxed.
+
+Numeric columns should use tabular numbers where useful.
+
+Dates shown to users should be human-readable and consistent.
+
+Avoid exposing internal enum values such as:
+
+- `RECEIVED`
+- `EQUIPMENT_OK`
+- `IN_INSTALLATION`
+
+when a human-readable Spanish label exists.
+
+## Forms
+
+Forms must have:
+
+- clear labels
+- consistent input heights
+- visible focus state
+- disabled state
+- validation state
+- concise help/error messages
+
+Do not depend only on placeholder text as a label.
+
+Primary and secondary actions must be visually distinguishable.
+
+Dangerous or irreversible actions require appropriate visual distinction and,
+when necessary, confirmation.
+
+## Buttons
+
+Use a small, consistent button hierarchy:
+
+- primary
+- secondary
+- subtle/ghost
+- danger
+
+Do not create a new button style for each page.
+
+Buttons with the same purpose must look the same across SGOT.
+
+Use icons only when they improve recognition.
+
+Avoid decorative icons that add no information.
+
+## Status badges
+
+Statuses should use compact badges with semantic styling.
+
+Examples:
+
+- Recibida
+- Pendiente de equipos
+- Equipos OK
+- En instalación
+- Completada
+- Pendiente de conciliación
+- Conciliada
+
+Use human-readable Spanish labels in the UI.
+
+Internal enum/database values must remain implementation details.
+
+## Navigation
+
+Navigation must clearly indicate:
+
+- current section
+- hover state
+- available actions
+
+Use consistent iconography.
+
+Do not overcrowd the sidebar.
+
+Navigation labels should use business terminology understood by SGOT users.
+
+## Feedback and empty states
+
+Success, warning and error feedback must be visible but not visually aggressive.
+
+Empty states should explain:
+
+- what is missing
+- whether the user can take an action
+- what that action is
+
+Avoid generic empty messages when more useful context is available.
+
+## Responsive behavior
+
+The application is desktop-first because SGOT is primarily an operational system,
+but it must remain usable on narrower screens.
+
+Do not assume a fixed desktop width.
+
+Tables may scroll horizontally when necessary.
+
+Forms should collapse logically into fewer columns.
+
+Navigation must not cover content at smaller sizes.
+
+## Interaction states
+
+Every interactive component should consider:
+
+- default
+- hover
+- focus
+- active
+- disabled
+- loading when applicable
+- validation/error where applicable
+
+Keyboard focus must remain visible.
+
+## Accessibility
+
+Maintain sufficient text/background contrast.
+
+Do not communicate status solely through color.
+
+Use semantic HTML where practical.
+
+Inputs must have labels.
+
+Buttons and links must remain distinguishable.
+
+Focus indicators must not be removed without an accessible replacement.
+
+## CSS architecture
+
+Prefer reusable CSS classes and semantic design tokens.
+
+Do not use inline styles unless there is a compelling technical reason.
+
+Avoid duplicated CSS.
+
+Do not introduce page-specific arbitrary colors if an existing semantic token
+fits the purpose.
+
+Keep global visual primitives in the SGOT stylesheet/design system and keep
+page-specific CSS minimal.
+
+## Bootstrap
+
+Bootstrap may continue to provide basic layout utilities where already useful.
+
+Do not allow default Bootstrap visual styling to define SGOT's identity.
+
+SGOT's custom design system should control:
+
+- colors
+- typography
+- surfaces
+- buttons
+- forms
+- tables
+- badges
+- navigation
+
+Do not introduce another large UI framework without an explicit architectural
+decision.
+
+## JavaScript and themes
+
+Theme switching must remain lightweight.
+
+Prefer a small native JavaScript implementation.
+
+The selected theme should persist between page loads.
+
+Avoid introducing a frontend framework solely for theme switching or visual
+effects.
+
+Avoid flashes of the wrong theme during page load.
+
+## Business logic separation
+
+Visual refactors must not change business rules.
+
+Do not move business logic into templates or JavaScript.
+
+Django views/services/models remain responsible for application behavior.
+
+A UI redesign must preserve:
+
+- permissions
+- workflow rules
+- form validation
+- service-layer operations
+- URLs unless intentionally changed
+- existing tests
+
+When modifying existing screens for visual reasons, make the smallest necessary
+HTML/CSS/JS changes.
+
+## Visual consistency requirement
+
+Before creating a new visual pattern, check whether SGOT already has a component
+that solves the same problem.
+
+Prefer improving and reusing an existing component over introducing a second
+version.
+
+The application should feel like one coherent product, not a collection of pages
+designed independently.

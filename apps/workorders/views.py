@@ -1,7 +1,11 @@
+from datetime import date, datetime
+import re
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.workorders.forms import (
@@ -10,7 +14,7 @@ from apps.workorders.forms import (
     WorkOrderScheduleForm,
     WorkOrderStatusForm,
 )
-from apps.workorders.models import WorkOrder
+from apps.workorders.models import WorkOrder, WorkOrderHistory
 from apps.workorders.services import (
     change_status,
     complete_work_order,
@@ -18,6 +22,192 @@ from apps.workorders.services import (
     schedule_work_order,
     start_installation,
 )
+
+
+_STATUS_LABELS = {
+    WorkOrder.Status.RECEIVED: "Recibida",
+    WorkOrder.Status.PENDING_EQUIPMENT: "Pendiente de equipos",
+    WorkOrder.Status.EQUIPMENT_OK: "Equipos OK",
+    WorkOrder.Status.IN_INSTALLATION: "En instalación",
+    WorkOrder.Status.COMPLETED: "Completada",
+}
+_MONTHS_ES = {
+    1: "ene",
+    2: "feb",
+    3: "mar",
+    4: "abr",
+    5: "may",
+    6: "jun",
+    7: "jul",
+    8: "ago",
+    9: "sep",
+    10: "oct",
+    11: "nov",
+    12: "dic",
+}
+_EMPTY_VALUES = {"", "none", "null", "—"}
+_ISO_DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
+_STATUS_TOKEN_RE = re.compile(
+    r"\b(RECEIVED|PENDING_EQUIPMENT|EQUIPMENT_OK|IN_INSTALLATION|COMPLETED)\b"
+)
+_NONE_TOKEN_RE = re.compile(r"\bNone\b")
+
+
+def _format_date_es(value):
+    if isinstance(value, datetime):
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        value = value.date()
+    if isinstance(value, date):
+        return f"{value.day} {_MONTHS_ES[value.month]} {value.year}"
+    return None
+
+
+def _format_datetime_es(value):
+    if timezone.is_aware(value):
+        value = timezone.localtime(value)
+    return (
+        f"{value.day} {_MONTHS_ES[value.month]} {value.year}, "
+        f"{value:%H:%M}"
+    )
+
+
+def _parse_iso_date(text):
+    text = text.strip()
+    for fmt in ("%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"):
+        try:
+            parsed = datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+        if fmt == "%Y-%m-%d":
+            return parsed.date()
+        return parsed
+    return None
+
+
+def _split_compound_value(raw):
+    if raw is None:
+        return "", ""
+    text = str(raw)
+    if " | " in text:
+        left, right = text.split(" | ", 1)
+        return left, right
+    return text, ""
+
+
+def _present_history_value(raw):
+    if raw is None:
+        return "—"
+
+    text = str(raw).strip()
+    if text.lower() in _EMPTY_VALUES:
+        return "—"
+
+    if " | " in text:
+        left, right = _split_compound_value(text)
+        parts = [
+            part
+            for part in (_present_history_value(left), _present_history_value(right))
+            if part != "—"
+        ]
+        return " · ".join(parts) if parts else "—"
+
+    if text in _STATUS_LABELS:
+        return _STATUS_LABELS[text]
+
+    parsed = _parse_iso_date(text)
+    formatted = _format_date_es(parsed) if parsed is not None else None
+    if formatted:
+        return formatted
+
+    return text
+
+
+def _sanitize_description(text):
+    if not text or str(text).strip().lower() in _EMPTY_VALUES:
+        return "—"
+
+    def replace_date(match):
+        parsed = _parse_iso_date(match.group(1))
+        formatted = _format_date_es(parsed) if parsed is not None else None
+        return formatted or match.group(1)
+
+    presented = _ISO_DATE_RE.sub(replace_date, str(text))
+    presented = _STATUS_TOKEN_RE.sub(
+        lambda match: _STATUS_LABELS.get(match.group(1), match.group(1)),
+        presented,
+    )
+    presented = _NONE_TOKEN_RE.sub("—", presented)
+    return re.sub(r"\s+", " ", presented).strip()
+
+
+def _present_history_description(entry):
+    event_type = entry.event_type
+    previous = _present_history_value(entry.previous_value)
+    new = _present_history_value(entry.new_value)
+
+    if event_type == WorkOrderHistory.EventType.STATUS_CHANGED:
+        return f"Estado cambiado de {previous} a {new}."
+
+    if event_type == WorkOrderHistory.EventType.SCHEDULED:
+        date_part, technician_part = _split_compound_value(entry.new_value)
+        date_label = _present_history_value(date_part)
+        technician_label = _present_history_value(technician_part)
+        if date_label != "—" and technician_label != "—":
+            return (
+                f"Orden programada para el {date_label}. "
+                f"Técnico: {technician_label}."
+            )
+        if date_label != "—":
+            return f"Orden programada para el {date_label}."
+
+    if event_type == WorkOrderHistory.EventType.RESCHEDULED:
+        prev_date, prev_technician = _split_compound_value(entry.previous_value)
+        new_date, new_technician = _split_compound_value(entry.new_value)
+        prev_date_label = _present_history_value(prev_date)
+        new_date_label = _present_history_value(new_date)
+        prev_technician_label = _present_history_value(prev_technician)
+        new_technician_label = _present_history_value(new_technician)
+        if prev_date_label == "—" and new_date_label != "—":
+            if new_technician_label != "—":
+                return (
+                    f"Orden programada para el {new_date_label}. "
+                    f"Técnico: {new_technician_label}."
+                )
+            return f"Orden programada para el {new_date_label}."
+        if new_date_label != "—":
+            description = (
+                f"Orden reprogramada del {prev_date_label} al {new_date_label}."
+            )
+            if (
+                prev_technician_label != "—"
+                or new_technician_label != "—"
+            ):
+                description += (
+                    f" Técnico: {prev_technician_label} → {new_technician_label}."
+                )
+            return description
+
+    if event_type == WorkOrderHistory.EventType.TECHNICIAN_CHANGED:
+        return f"Técnico cambiado de {previous} a {new}."
+
+    return _sanitize_description(entry.description)
+
+
+def _history_presentation(entries):
+    rows = []
+    for entry in entries:
+        rows.append(
+            {
+                "created_at": _format_datetime_es(entry.created_at),
+                "event_type_label": entry.get_event_type_display(),
+                "user": entry.user,
+                "description": _present_history_description(entry),
+                "previous_value": _present_history_value(entry.previous_value),
+                "new_value": _present_history_value(entry.new_value),
+            }
+        )
+    return rows
 
 
 @login_required
@@ -167,7 +357,10 @@ def _ensure_detail_action_forms(request, work_order, context):
 
 
 def _render_work_order_detail(request, work_order, extra_context=None):
-    context = {"work_order": work_order}
+    context = {
+        "work_order": work_order,
+        "history_entries": _history_presentation(work_order.history.all()),
+    }
     if extra_context:
         context.update(extra_context)
     _ensure_detail_action_forms(request, work_order, context)

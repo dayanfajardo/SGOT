@@ -203,3 +203,63 @@ class WorkOrderDetailViewTests(TestCase):
         self.assertContains(response, self.history.description)
         self.assertContains(response, self.history.get_event_type_display())
         self.assertContains(response, str(self.history.user))
+
+    def test_history_presents_human_status_labels_instead_of_internal_values(self):
+        stored_description = "Estado cambiado de RECEIVED a EQUIPMENT_OK."
+        WorkOrderHistory.objects.create(
+            work_order=self.own_order,
+            user=self.admin_user,
+            event_type=WorkOrderHistory.EventType.STATUS_CHANGED,
+            description=stored_description,
+            previous_value=WorkOrder.Status.RECEIVED,
+            new_value=WorkOrder.Status.EQUIPMENT_OK,
+        )
+
+        response = self._get_detail(self.admin_user)
+
+        self.assertContains(response, "Recibida")
+        self.assertContains(response, "Equipos OK")
+        self.assertContains(
+            response,
+            "Estado cambiado de Recibida a Equipos OK.",
+        )
+        self.assertNotContains(response, "RECEIVED")
+        self.assertNotContains(response, "EQUIPMENT_OK")
+        self.assertEqual(
+            WorkOrderHistory.objects.get(
+                work_order=self.own_order,
+                event_type=WorkOrderHistory.EventType.STATUS_CHANGED,
+            ).description,
+            stored_description,
+        )
+
+    def test_history_shows_dash_instead_of_none_and_human_dates(self):
+        stored_description = (
+            "Orden reprogramada del None al 2026-10-05. "
+            "Técnico: Sin técnico -> Walter Zúñiga."
+        )
+        WorkOrderHistory.objects.create(
+            work_order=self.own_order,
+            user=self.admin_user,
+            event_type=WorkOrderHistory.EventType.RESCHEDULED,
+            description=stored_description,
+            previous_value="None | Sin técnico",
+            new_value="2026-10-05 | Walter Zúñiga",
+        )
+
+        response = self._get_detail(self.admin_user)
+
+        self.assertContains(
+            response,
+            "Orden programada para el 5 oct 2026. Técnico: Walter Zúñiga.",
+        )
+        self.assertContains(response, "5 oct 2026 · Walter Zúñiga")
+        self.assertNotContains(response, "None")
+        self.assertNotContains(response, "2026-10-05")
+        self.assertEqual(
+            WorkOrderHistory.objects.get(
+                work_order=self.own_order,
+                event_type=WorkOrderHistory.EventType.RESCHEDULED,
+            ).description,
+            stored_description,
+        )

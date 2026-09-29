@@ -1,14 +1,22 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from apps.warehouse.forms import (
     WarehouseOutputCreateForm,
     WarehouseOutputItemFormSet,
+    WarehouseReturnFormSet,
 )
 from apps.warehouse.models import WarehouseOutput
-from apps.warehouse.services import add_output_item, create_warehouse_output
+from apps.warehouse.services import (
+    add_output_item,
+    create_warehouse_output,
+    reconcile_warehouse_output,
+    update_returned_quantity,
+)
 from apps.workorders.models import WorkOrder
 
 
@@ -76,4 +84,100 @@ def warehouse_output_create(request, work_order_pk):
             "formset": formset,
             "work_order": work_order,
         },
+    )
+
+
+@login_required
+def warehouse_output_returns(request, pk):
+    if not request.user.has_perm("warehouse.change_warehouseoutput"):
+        raise PermissionDenied
+
+    warehouse_output = get_object_or_404(WarehouseOutput, pk=pk)
+    items = warehouse_output.items.select_related(
+        "product",
+        "work_order_item",
+        "work_order_item__product",
+    ).order_by("id")
+
+    if warehouse_output.reconciled_at is not None:
+        raise PermissionDenied(
+            "No se pueden modificar devoluciones de una salida ya conciliada."
+        )
+
+    if request.method == "POST":
+        formset = WarehouseReturnFormSet(
+            request.POST,
+            form_kwargs={"warehouse_output": warehouse_output},
+        )
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    for form in formset:
+                        output_item = warehouse_output.items.get(
+                            pk=form.cleaned_data["item_id"],
+                        )
+                        try:
+                            update_returned_quantity(
+                                output_item=output_item,
+                                returned_quantity=form.cleaned_data[
+                                    "returned_quantity"
+                                ],
+                            )
+                        except ValidationError as exc:
+                            form.add_error(None, exc)
+                            raise
+            except ValidationError:
+                pass
+            else:
+                return redirect(
+                    "workorders:workorder_detail",
+                    pk=warehouse_output.work_order_id,
+                )
+    else:
+        initial = [
+            {
+                "item_id": item.pk,
+                "returned_quantity": item.returned_quantity,
+            }
+            for item in items
+        ]
+        formset = WarehouseReturnFormSet(
+            initial=initial,
+            form_kwargs={"warehouse_output": warehouse_output},
+        )
+
+    return render(
+        request,
+        "warehouse/warehouse_return_form.html",
+        {
+            "warehouse_output": warehouse_output,
+            "formset": formset,
+            "items": items,
+        },
+    )
+
+
+@login_required
+@require_POST
+def warehouse_output_reconcile(request, pk):
+    if not request.user.has_perm("warehouse.change_warehouseoutput"):
+        raise PermissionDenied
+
+    warehouse_output = get_object_or_404(WarehouseOutput, pk=pk)
+
+    try:
+        reconcile_warehouse_output(
+            warehouse_output=warehouse_output,
+            actor=request.user,
+        )
+    except ValidationError as exc:
+        messages.error(request, " ".join(exc.messages))
+        return redirect(
+            "workorders:workorder_detail",
+            pk=warehouse_output.work_order_id,
+        )
+
+    return redirect(
+        "workorders:workorder_detail",
+        pk=warehouse_output.work_order_id,
     )

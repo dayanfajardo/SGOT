@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar devoluciones{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header">
+        <h1>Registrar devoluciones</h1>
+        <p>Salida {{ warehouse_output.number }}</p>
+        <p>OT {{ warehouse_output.work_order.number }}</p>
+        <p>{{ warehouse_output.work_order.customer }}</p>
+        <p>Técnico: {{ warehouse_output.technician|default:"—" }}</p>
+    </header>
+
+    <form method="post" class="sgot-form">
+        {% csrf_token %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Ítems de la salida</h2>
+            </header>
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}
+            <div class="sgot-card-body">
+                <div class="sgot-form-errors" role="alert">
+                    {{ formset.non_form_errors }}
+                </div>
+            </div>
+            {% endif %}
+            {% if items %}
+            <div class="table-responsive">
+                <table class="sgot-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Origen</th>
+                            <th class="sgot-col-qty">Cantidad entregada</th>
+                            <th class="sgot-col-qty">Cantidad devuelta</th>
+                            <th class="sgot-col-qty">Cantidad utilizada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product }}</td>
+                            <td>
+                                {% if item.work_order_item %}
+                                <span class="sgot-origin">Ítem de OT</span>
+                                {% else %}
+                                <span class="sgot-origin">Adicional</span>
+                                {% endif %}
+                            </td>
+                            <td class="sgot-qty-readonly">{{ item.delivered_quantity }}</td>
+                            <td>
+                                {% for form in formset %}
+                                    {% if form.item_id.value|stringformat:"s" == item.pk|stringformat:"s" %}
+                                        {{ form.item_id }}
+                                        {% if form.non_field_errors %}
+                                        <div class="sgot-form-errors" role="alert">
+                                            {{ form.non_field_errors }}
+                                        </div>
+                                        {% endif %}
+                                        {{ form.item_id.errors }}
+                                        {{ form.returned_quantity }}
+                                        {{ form.returned_quantity.errors }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td class="sgot-qty-readonly">{{ item.used_quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="sgot-empty">No hay ítems registrados en esta salida.</p>
+            {% endif %}
+        </section>
+
+        <div class="sgot-form-actions">
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar devoluciones</button>
+            <a href="{% url 'workorders:workorder_detail' warehouse_output.work_order_id %}" class="sgot-btn">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

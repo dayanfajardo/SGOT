@@ -31,6 +31,13 @@
             </header>
 
             <main class="sgot-main">
+                {% if messages %}
+                <div class="sgot-messages">
+                    {% for message in messages %}
+                    <div class="sgot-form-errors" role="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% block content %}{% endblock %}
             </main>
         </div>

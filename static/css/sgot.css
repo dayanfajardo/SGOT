@@ -371,6 +371,17 @@ a.sgot-nav-item:hover {
     width: 10rem;
 }
 
+.sgot-origin {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.sgot-qty-readonly {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 .sgot-table .sgot-col-wo-item {
     width: 16rem;
     min-width: 12rem;

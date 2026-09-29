@@ -191,6 +191,13 @@
             </header>
             {% if warehouse_output %}
             <div class="sgot-card-body">
+                {% if reconcile_warehouse_output_error %}
+                <div class="sgot-form-errors" role="alert">
+                    {% for message in reconcile_warehouse_output_error %}
+                    <p class="mb-0">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div class="sgot-form-grid">
                     <div class="sgot-field">
                         <label>Número</label>
@@ -218,6 +225,14 @@
                             {% endif %}
                         </p>
                     </div>
+                    {% if can_register_returns %}
+                    <div class="sgot-field">
+                        <label>Acciones</label>
+                        <p class="mb-0">
+                            <a href="{% url 'warehouse:warehouse_output_returns' warehouse_output.pk %}" class="sgot-btn sgot-btn-primary">Registrar devoluciones</a>
+                        </p>
+                    </div>
+                    {% endif %}
                     {% if warehouse_output.reconciled_at %}
                     <div class="sgot-field">
                         <label>Fecha de conciliación</label>
@@ -233,6 +248,15 @@
                         <p class="mb-0">{{ warehouse_output.notes|default:"—" }}</p>
                     </div>
                 </div>
+                {% if can_reconcile_warehouse_output %}
+                <form method="post" action="{% url 'warehouse:warehouse_output_reconcile' warehouse_output.pk %}" class="sgot-form mt-3">
+                    {% csrf_token %}
+                    <p class="mb-2 text-muted">Al conciliar la salida, las cantidades devueltas quedarán cerradas.</p>
+                    <div class="sgot-form-actions">
+                        <button type="submit" class="sgot-btn sgot-btn-primary">Conciliar salida</button>
+                    </div>
+                </form>
+                {% endif %}
             </div>
             {% if warehouse_output.items.all %}
             <div class="table-responsive">

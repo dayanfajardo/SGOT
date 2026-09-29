@@ -142,6 +142,21 @@ def _ensure_detail_action_forms(request, work_order, context):
             and warehouse_output is None
         )
 
+    if "can_register_returns" not in context:
+        context["can_register_returns"] = (
+            warehouse_output is not None
+            and warehouse_output.reconciled_at is None
+            and request.user.has_perm("warehouse.change_warehouseoutput")
+        )
+
+    if "can_reconcile_warehouse_output" not in context:
+        context["can_reconcile_warehouse_output"] = (
+            warehouse_output is not None
+            and warehouse_output.reconciled_at is None
+            and work_order.status == WorkOrder.Status.IN_INSTALLATION
+            and request.user.has_perm("warehouse.change_warehouseoutput")
+        )
+
     if "can_complete_work_order" not in context:
         context["can_complete_work_order"] = (
             request.user.has_perm("workorders.change_workorder")

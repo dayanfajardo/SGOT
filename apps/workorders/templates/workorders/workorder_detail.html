@@ -1,67 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}OT {{ work_order.number }}{% endblock %}
+{% block title %}OT {{ work_order.number }} {% endblock %}
 
 {% block content %}
-    <header class="sgot-page-header d-flex justify-content-between align-items-start gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
                 <h1>OT {{ work_order.number }}</h1>
                 <span class="sgot-badge sgot-badge-{{ work_order.status|lower }}">
                     {{ work_order.get_status_display }}
                 </span>
             </div>
-            <p>{{ work_order.customer }}</p>
+            <p class="sgot-detail-customer">
+                {{ work_order.customer.trade_name }}
+                {% if work_order.customer.customer_code %}
+                    - {{ work_order.customer.customer_code }}
+                {% endif %}
+            </p>
         </div>
-        <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn">Volver a órdenes</a>
+        <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn sgot-btn-quiet">Volver a órdenes</a>
     </header>
 
-    <div class="d-flex flex-column gap-3">
+    <div class="sgot-detail">
         <section class="sgot-card">
             <header class="sgot-card-header">
-                <h2>Información general</h2>
+                <h2>Resumen operativo</h2>
             </header>
             <div class="sgot-card-body">
-                <div class="sgot-form-grid">
-                    <div class="sgot-field">
-                        <label>Comercial</label>
-                        <p class="mb-0">{{ work_order.commercial }}</p>
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Tipo de trabajo</span>
+                        <p class="sgot-summary-value">{{ work_order.work_type }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Tipo de trabajo</label>
-                        <p class="mb-0">{{ work_order.work_type }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Comercial</span>
+                        <p class="sgot-summary-value">{{ work_order.commercial }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Fecha recibida</label>
-                        <p class="mb-0">{{ work_order.received_date }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Técnico asignado</span>
+                        <p class="sgot-summary-value">{{ work_order.assigned_technician|default:"—" }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Dirección de instalación</label>
-                        <p class="mb-0">{{ work_order.installation_address|default:"—" }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha recibida</span>
+                        <p class="sgot-summary-value">{{ work_order.received_date }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Técnico asignado</label>
-                        <p class="mb-0">{{ work_order.assigned_technician|default:"—" }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha programada</span>
+                        <p class="sgot-summary-value">{{ work_order.scheduled_date|default:"—" }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Fecha programada</label>
-                        <p class="mb-0">{{ work_order.scheduled_date|default:"—" }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Dirección de instalación</span>
+                        <p class="sgot-summary-value">{{ work_order.installation_address|default:"—" }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Fecha inicio de instalación</label>
-                        <p class="mb-0">{{ work_order.installation_started_at|default:"—" }}</p>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha inicio de instalación</span>
+                        <p class="sgot-summary-value">{{ work_order.installation_started_at|default:"—" }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Fecha completada</label>
-                        <p class="mb-0">{{ work_order.completed_at|default:"—" }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha completada</span>
+                        <p class="sgot-summary-value">{{ work_order.completed_at|default:"—" }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Creada por</label>
-                        <p class="mb-0">{{ work_order.created_by }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Creada por</span>
+                        <p class="sgot-summary-value">{{ work_order.created_by }}</p>
                     </div>
-                    <div class="sgot-field sgot-field-wide">
-                        <label>Notas</label>
-                        <p class="mb-0">{{ work_order.notes|default:"—" }}</p>
+                    <div class="sgot-summary-item sgot-summary-item-wide">
+                        <span class="sgot-summary-label">Notas</span>
+                        <p class="sgot-summary-value">{{ work_order.notes|default:"—" }}</p>
                     </div>
                 </div>
             </div>
@@ -72,7 +79,7 @@
             <header class="sgot-card-header">
                 <h2>Acciones</h2>
             </header>
-            <div class="sgot-card-body">
+            <div class="sgot-card-body sgot-actions-layout">
                 {% if start_installation_error %}
                 <div class="sgot-form-errors" role="alert">
                     {% for message in start_installation_error %}
@@ -87,70 +94,68 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <div class="sgot-actions-grid">
-                    {% if status_form %}
-                    <form method="post" action="{% url 'workorders:workorder_change_status' work_order.pk %}" class="sgot-form sgot-action-form">
-                        {% csrf_token %}
-                        <h3>Actualizar estado</h3>
-                        {% if status_form.non_field_errors %}
-                        <div class="sgot-form-errors" role="alert">
-                            {{ status_form.non_field_errors }}
-                        </div>
-                        {% endif %}
-                        <div class="sgot-field">
-                            <label for="{{ status_form.new_status.id_for_label }}">{{ status_form.new_status.label }}</label>
-                            {{ status_form.new_status }}
-                            {{ status_form.new_status.errors }}
-                        </div>
-                        <div class="sgot-form-actions">
-                            <button type="submit" class="sgot-btn sgot-btn-primary">Actualizar estado</button>
-                        </div>
-                    </form>
-                    {% endif %}
 
-                    {% if schedule_form %}
-                    <form method="post" action="{% url 'workorders:workorder_schedule' work_order.pk %}" class="sgot-form sgot-action-form">
-                        {% csrf_token %}
-                        <h3>Programación técnica</h3>
-                        {% if schedule_form.non_field_errors %}
-                        <div class="sgot-form-errors" role="alert">
-                            {{ schedule_form.non_field_errors }}
-                        </div>
-                        {% endif %}
-                        <div class="sgot-field">
-                            <label for="{{ schedule_form.technician.id_for_label }}">{{ schedule_form.technician.label }}</label>
-                            {{ schedule_form.technician }}
-                            {{ schedule_form.technician.errors }}
-                        </div>
-                        <div class="sgot-field">
-                            <label for="{{ schedule_form.scheduled_date.id_for_label }}">{{ schedule_form.scheduled_date.label }}</label>
-                            {{ schedule_form.scheduled_date }}
-                            {{ schedule_form.scheduled_date.errors }}
-                        </div>
-                        <div class="sgot-form-actions">
-                            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar programación</button>
-                        </div>
-                    </form>
-                    {% endif %}
-
+                {% if can_start_installation or can_complete_work_order %}
+                <div class="sgot-action-panel sgot-action-panel-primary">
                     {% if can_start_installation %}
-                    <form method="post" action="{% url 'workorders:workorder_start_installation' work_order.pk %}" class="sgot-form sgot-action-form">
+                    <form method="post" action="{% url 'workorders:workorder_start_installation' work_order.pk %}" class="sgot-inline-form">
                         {% csrf_token %}
-                        <div class="sgot-form-actions">
-                            <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar instalación</button>
-                        </div>
+                        <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar instalación</button>
                     </form>
                     {% endif %}
-
                     {% if can_complete_work_order %}
-                    <form method="post" action="{% url 'workorders:workorder_complete' work_order.pk %}" class="sgot-form sgot-action-form">
+                    <form method="post" action="{% url 'workorders:workorder_complete' work_order.pk %}" class="sgot-inline-form">
                         {% csrf_token %}
-                        <div class="sgot-form-actions">
-                            <button type="submit" class="sgot-btn sgot-btn-primary">Completar orden</button>
-                        </div>
+                        <button type="submit" class="sgot-btn sgot-btn-primary">Completar orden</button>
                     </form>
                     {% endif %}
                 </div>
+                {% endif %}
+
+                {% if schedule_form %}
+                <form method="post" action="{% url 'workorders:workorder_schedule' work_order.pk %}" class="sgot-form sgot-action-panel sgot-action-panel-secondary">
+                    {% csrf_token %}
+                    <h3>Programación técnica</h3>
+                    {% if schedule_form.non_field_errors %}
+                    <div class="sgot-form-errors" role="alert">
+                        {{ schedule_form.non_field_errors }}
+                    </div>
+                    {% endif %}
+                    <div class="sgot-field">
+                        <label for="{{ schedule_form.technician.id_for_label }}">{{ schedule_form.technician.label }}</label>
+                        {{ schedule_form.technician }}
+                        {{ schedule_form.technician.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ schedule_form.scheduled_date.id_for_label }}">{{ schedule_form.scheduled_date.label }}</label>
+                        {{ schedule_form.scheduled_date }}
+                        {{ schedule_form.scheduled_date.errors }}
+                    </div>
+                    <div class="sgot-form-actions">
+                        <button type="submit" class="sgot-btn sgot-btn-secondary">Guardar programación</button>
+                    </div>
+                </form>
+                {% endif %}
+
+                {% if status_form %}
+                <form method="post" action="{% url 'workorders:workorder_change_status' work_order.pk %}" class="sgot-form sgot-action-panel sgot-action-panel-secondary">
+                    {% csrf_token %}
+                    <h3>Actualizar estado</h3>
+                    {% if status_form.non_field_errors %}
+                    <div class="sgot-form-errors" role="alert">
+                        {{ status_form.non_field_errors }}
+                    </div>
+                    {% endif %}
+                    <div class="sgot-field">
+                        <label for="{{ status_form.new_status.id_for_label }}">{{ status_form.new_status.label }}</label>
+                        {{ status_form.new_status }}
+                        {{ status_form.new_status.errors }}
+                    </div>
+                    <div class="sgot-form-actions">
+                        <button type="submit" class="sgot-btn sgot-btn-secondary">Actualizar estado</button>
+                    </div>
+                </form>
+                {% endif %}
             </div>
         </section>
         {% endif %}
@@ -188,6 +193,21 @@
         <section class="sgot-card">
             <header class="sgot-card-header">
                 <h2>Salida de almacén</h2>
+                {% if warehouse_output %}
+                {% if can_register_returns or can_reconcile_warehouse_output %}
+                <div class="sgot-card-header-actions">
+                    {% if can_register_returns %}
+                    <a href="{% url 'warehouse:warehouse_output_returns' warehouse_output.pk %}" class="sgot-btn sgot-btn-primary">Registrar devoluciones</a>
+                    {% endif %}
+                    {% if can_reconcile_warehouse_output %}
+                    <form method="post" action="{% url 'warehouse:warehouse_output_reconcile' warehouse_output.pk %}" class="sgot-inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="sgot-btn sgot-btn-primary">Conciliar salida</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endif %}
             </header>
             {% if warehouse_output %}
             <div class="sgot-card-body">
@@ -198,65 +218,51 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <div class="sgot-form-grid">
-                    <div class="sgot-field">
-                        <label>Número</label>
-                        <p class="mb-0">{{ warehouse_output.number }}</p>
+                {% if can_reconcile_warehouse_output %}
+                <p class="sgot-help">Al conciliar la salida, las cantidades devueltas quedarán cerradas.</p>
+                {% endif %}
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Número</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.number }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Técnico</label>
-                        <p class="mb-0">{{ warehouse_output.technician }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Técnico</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.technician }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Fecha de salida</label>
-                        <p class="mb-0">{{ warehouse_output.output_date }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de salida</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.output_date }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Creado por</label>
-                        <p class="mb-0">{{ warehouse_output.created_by }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Creado por</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.created_by }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Estado de conciliación</label>
-                        <p class="mb-0">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Estado de conciliación</span>
+                        <p class="sgot-summary-value">
                             {% if warehouse_output.reconciled_at %}
                             <span class="sgot-badge sgot-badge-completed">Conciliada</span>
                             {% else %}
-                            <span class="sgot-badge sgot-badge-pending_equipment">Pendiente de conciliación</span>
+                            <span class="sgot-badge sgot-badge-pending_reconciliation">Pendiente de conciliación</span>
                             {% endif %}
                         </p>
                     </div>
-                    {% if can_register_returns %}
-                    <div class="sgot-field">
-                        <label>Acciones</label>
-                        <p class="mb-0">
-                            <a href="{% url 'warehouse:warehouse_output_returns' warehouse_output.pk %}" class="sgot-btn sgot-btn-primary">Registrar devoluciones</a>
-                        </p>
-                    </div>
-                    {% endif %}
                     {% if warehouse_output.reconciled_at %}
-                    <div class="sgot-field">
-                        <label>Fecha de conciliación</label>
-                        <p class="mb-0">{{ warehouse_output.reconciled_at }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de conciliación</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.reconciled_at }}</p>
                     </div>
-                    <div class="sgot-field">
-                        <label>Conciliado por</label>
-                        <p class="mb-0">{{ warehouse_output.reconciled_by }}</p>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Conciliado por</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.reconciled_by }}</p>
                     </div>
                     {% endif %}
-                    <div class="sgot-field sgot-field-wide">
-                        <label>Notas</label>
-                        <p class="mb-0">{{ warehouse_output.notes|default:"—" }}</p>
+                    <div class="sgot-summary-item sgot-summary-item-wide">
+                        <span class="sgot-summary-label">Notas</span>
+                        <p class="sgot-summary-value">{{ warehouse_output.notes|default:"—" }}</p>
                     </div>
                 </div>
-                {% if can_reconcile_warehouse_output %}
-                <form method="post" action="{% url 'warehouse:warehouse_output_reconcile' warehouse_output.pk %}" class="sgot-form mt-3">
-                    {% csrf_token %}
-                    <p class="mb-2 text-muted">Al conciliar la salida, las cantidades devueltas quedarán cerradas.</p>
-                    <div class="sgot-form-actions">
-                        <button type="submit" class="sgot-btn sgot-btn-primary">Conciliar salida</button>
-                    </div>
-                </form>
-                {% endif %}
             </div>
             {% if warehouse_output.items.all %}
             <div class="table-responsive">

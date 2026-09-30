@@ -10,7 +10,7 @@
         <p>Registra una orden recibida en almacén</p>
     </header>
 
-    <form method="post" class="sgot-form">
+    <form method="post" class="sgot-form sgot-workorder-form">
         {% csrf_token %}
 
         <section class="sgot-card">
@@ -77,19 +77,19 @@
             </div>
             {% endif %}
             <div class="table-responsive">
-                <table class="sgot-table">
+                <table class="sgot-table sgot-formset-table">
                     <thead>
                         <tr>
-                            <th>Producto</th>
+                            <th class="sgot-col-product">Producto</th>
                             <th class="sgot-col-qty">Cantidad solicitada</th>
-                            <th>Notas</th>
-                            <th class="sgot-col-delete"></th>
+                            <th class="sgot-col-notes">Notas</th>
+                            <th class="sgot-col-delete">Quitar</th>
                         </tr>
                     </thead>
                     <tbody id="item-formset-body">
                         {% for item_form in formset %}
                         <tr>
-                            <td>
+                            <td class="sgot-col-product" data-label="Producto">
                                 {{ item_form.id }}
                                 {% if item_form.non_field_errors %}
                                 <div class="sgot-form-errors" role="alert">
@@ -99,15 +99,15 @@
                                 {{ item_form.product }}
                                 {{ item_form.product.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-qty" data-label="Cantidad solicitada">
                                 {{ item_form.requested_quantity }}
                                 {{ item_form.requested_quantity.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-notes" data-label="Notas">
                                 {{ item_form.notes }}
                                 {{ item_form.notes.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-delete" data-label="Quitar">
                                 <span class="sgot-formset-delete">{{ item_form.DELETE }}</span>
                                 <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
                             </td>
@@ -117,37 +117,69 @@
                 </table>
             </div>
             <div class="sgot-formset-toolbar">
-                <button type="button" class="sgot-btn" id="add-item-row">+ Agregar producto</button>
+                <button type="button" class="sgot-btn sgot-btn-quiet" id="add-item-row">+ Agregar producto</button>
             </div>
         </section>
 
         <template id="empty-item-form">
             <tr data-dynamic-row>
-                <td>
+                <td class="sgot-col-product" data-label="Producto">
                     {{ formset.empty_form.id }}
                     {{ formset.empty_form.product }}
                 </td>
-                <td>
+                <td class="sgot-col-qty" data-label="Cantidad solicitada">
                     {{ formset.empty_form.requested_quantity }}
                 </td>
-                <td>
+                <td class="sgot-col-notes" data-label="Notas">
                     {{ formset.empty_form.notes }}
                 </td>
-                <td>
+                <td class="sgot-col-delete" data-label="Quitar">
                     <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
                 </td>
             </tr>
         </template>
 
         <div class="sgot-form-actions">
+            <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
             <button type="submit" class="sgot-btn sgot-btn-primary">Guardar orden</button>
-            <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn">Cancelar</a>
         </div>
     </form>
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
     <script>
     (function () {
+        function initSearchableSelect(selectEl, placeholder) {
+            if (!selectEl || selectEl.tomselect) {
+                return;
+            }
+            const emptyOption = selectEl.querySelector('option[value=""]');
+            if (emptyOption) {
+                emptyOption.textContent = "";
+            }
+            new TomSelect(selectEl, {
+                placeholder: placeholder,
+                allowEmptyOption: Boolean(emptyOption),
+                create: false,
+                maxOptions: null,
+                sortField: { field: "text", direction: "asc" },
+                dropdownParent: "body",
+                plugins: ["dropdown_input"],
+            });
+        }
+
+        initSearchableSelect(
+            document.getElementById("{{ form.customer.id_for_label }}"),
+            "Buscar cliente..."
+        );
+        initSearchableSelect(
+            document.getElementById("{{ form.commercial.id_for_label }}"),
+            "Buscar comercial..."
+        );
+        initSearchableSelect(
+            document.getElementById("{{ form.work_type.id_for_label }}"),
+            "Buscar tipo de trabajo..."
+        );
+
         const tbody = document.getElementById("item-formset-body");
         const emptyTemplate = document.getElementById("empty-item-form");
         const addButton = document.getElementById("add-item-row");
@@ -184,21 +216,7 @@
         }
 
         function initProductSelect(selectEl) {
-            if (!selectEl || selectEl.tomselect) {
-                return;
-            }
-            const emptyOption = selectEl.querySelector('option[value=""]');
-            if (emptyOption) {
-                emptyOption.textContent = "";
-            }
-            new TomSelect(selectEl, {
-                placeholder: "Buscar producto...",
-                allowEmptyOption: true,
-                create: false,
-                maxOptions: null,
-                sortField: { field: "text", direction: "asc" },
-                dropdownParent: "body",
-            });
+            initSearchableSelect(selectEl, "Buscar producto...");
         }
 
         function initRowProductSelect(row) {

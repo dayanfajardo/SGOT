@@ -254,6 +254,8 @@ class WorkOrderDetailViewTests(TestCase):
             "Orden programada para el 5 oct 2026. Técnico: Walter Zúñiga.",
         )
         self.assertContains(response, "5 oct 2026 · Walter Zúñiga")
+        html = response.content.decode()
+        index = html.find("None")        
         self.assertNotContains(response, "None")
         self.assertNotContains(response, "2026-10-05")
         self.assertEqual(

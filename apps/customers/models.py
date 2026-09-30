@@ -65,4 +65,7 @@ class Customer(models.Model):
         ]
 
     def __str__(self):
+        code = (self.customer_code or "").strip()
+        if code:
+            return f"{self.trade_name} - {code}"
         return self.trade_name

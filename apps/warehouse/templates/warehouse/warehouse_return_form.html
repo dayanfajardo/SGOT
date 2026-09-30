@@ -3,15 +3,13 @@
 {% block title %}Registrar devoluciones{% endblock %}
 
 {% block content %}
-    <header class="sgot-page-header">
+    <header class="sgot-page-header sgot-returns-header">
         <h1>Registrar devoluciones</h1>
-        <p>Salida {{ warehouse_output.number }}</p>
-        <p>OT {{ warehouse_output.work_order.number }}</p>
-        <p>{{ warehouse_output.work_order.customer }}</p>
-        <p>Técnico: {{ warehouse_output.technician|default:"—" }}</p>
+        <p>Salida {{ warehouse_output.number }} · OT {{ warehouse_output.work_order.number }}</p>
+        <p>{{ warehouse_output.work_order.customer }} · Técnico: {{ warehouse_output.technician|default:"—" }}</p>
     </header>
 
-    <form method="post" class="sgot-form">
+    <form method="post" class="sgot-form sgot-warehouse-form">
         {% csrf_token %}
 
         <section class="sgot-card">
@@ -28,11 +26,11 @@
             {% endif %}
             {% if items %}
             <div class="table-responsive">
-                <table class="sgot-table">
+                <table class="sgot-table sgot-returns-table">
                     <thead>
                         <tr>
                             <th>Producto</th>
-                            <th>Origen</th>
+                            <th class="sgot-col-origin">Origen</th>
                             <th class="sgot-col-qty">Cantidad entregada</th>
                             <th class="sgot-col-qty">Cantidad devuelta</th>
                             <th class="sgot-col-qty">Cantidad utilizada</th>
@@ -42,15 +40,15 @@
                         {% for item in items %}
                         <tr>
                             <td>{{ item.product }}</td>
-                            <td>
+                            <td class="sgot-col-origin">
                                 {% if item.work_order_item %}
-                                <span class="sgot-origin">Ítem de OT</span>
+                                <span class="sgot-badge sgot-badge-event">Ítem de OT</span>
                                 {% else %}
-                                <span class="sgot-origin">Adicional</span>
+                                <span class="sgot-badge sgot-badge-event">Adicional</span>
                                 {% endif %}
                             </td>
-                            <td class="sgot-qty-readonly">{{ item.delivered_quantity }}</td>
-                            <td>
+                            <td class="sgot-col-qty sgot-qty-readonly">{{ item.delivered_quantity }}</td>
+                            <td class="sgot-col-qty sgot-col-qty-edit">
                                 {% for form in formset %}
                                     {% if form.item_id.value|stringformat:"s" == item.pk|stringformat:"s" %}
                                         {{ form.item_id }}
@@ -65,7 +63,7 @@
                                     {% endif %}
                                 {% endfor %}
                             </td>
-                            <td class="sgot-qty-readonly">{{ item.used_quantity }}</td>
+                            <td class="sgot-col-qty sgot-qty-used">{{ item.used_quantity }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -77,8 +75,8 @@
         </section>
 
         <div class="sgot-form-actions">
+            <a href="{% url 'workorders:workorder_detail' warehouse_output.work_order_id %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
             <button type="submit" class="sgot-btn sgot-btn-primary">Guardar devoluciones</button>
-            <a href="{% url 'workorders:workorder_detail' warehouse_output.work_order_id %}" class="sgot-btn">Cancelar</a>
         </div>
     </form>
 {% endblock %}

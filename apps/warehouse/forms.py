@@ -72,6 +72,11 @@ class WarehouseOutputItemForm(forms.ModelForm):
                 "Debe seleccionar un ítem de orden de trabajo o un "
                 "producto/material adicional."
             )
+        if work_order_item and product:
+            raise ValidationError(
+                "Seleccione un ítem de orden de trabajo o un producto/material "
+                "adicional, no ambos."
+            )
         return cleaned_data
 
 

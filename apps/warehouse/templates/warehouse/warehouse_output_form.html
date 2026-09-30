@@ -7,12 +7,11 @@
 
     <header class="sgot-page-header">
         <h1>Nueva salida de almacén</h1>
-        <p>OT {{ work_order.number }}</p>
-        <p>{{ work_order.customer }}</p>
+        <p>OT {{ work_order.number }} · {{ work_order.customer }}</p>
         <p>Técnico asignado: {{ work_order.assigned_technician|default:"—" }}</p>
     </header>
 
-    <form method="post" class="sgot-form">
+    <form method="post" class="sgot-form sgot-warehouse-form">
         {% csrf_token %}
 
         <section class="sgot-card">
@@ -59,20 +58,20 @@
             </div>
             {% endif %}
             <div class="table-responsive">
-                <table class="sgot-table">
+                <table class="sgot-table sgot-formset-table">
                     <thead>
                         <tr>
                             <th class="sgot-col-wo-item">Ítem de orden de trabajo</th>
-                            <th>Producto / material adicional</th>
+                            <th class="sgot-col-product">Producto / material adicional</th>
                             <th class="sgot-col-qty">Cantidad entregada</th>
-                            <th>Notas</th>
+                            <th class="sgot-col-notes">Notas</th>
                             <th class="sgot-col-delete">Quitar</th>
                         </tr>
                     </thead>
                     <tbody id="item-formset-body">
                         {% for item_form in formset %}
                         <tr>
-                            <td>
+                            <td class="sgot-col-wo-item" data-label="Ítem de orden de trabajo">
                                 {{ item_form.id }}
                                 {% if item_form.non_field_errors %}
                                 <div class="sgot-form-errors" role="alert">
@@ -82,19 +81,19 @@
                                 {{ item_form.work_order_item }}
                                 {{ item_form.work_order_item.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-product" data-label="Producto / material adicional">
                                 {{ item_form.product }}
                                 {{ item_form.product.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-qty" data-label="Cantidad entregada">
                                 {{ item_form.delivered_quantity }}
                                 {{ item_form.delivered_quantity.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-notes" data-label="Notas">
                                 {{ item_form.notes }}
                                 {{ item_form.notes.errors }}
                             </td>
-                            <td>
+                            <td class="sgot-col-delete" data-label="Quitar">
                                 <span class="sgot-formset-delete">{{ item_form.DELETE }}</span>
                                 <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
                             </td>
@@ -104,40 +103,59 @@
                 </table>
             </div>
             <div class="sgot-formset-toolbar">
-                <button type="button" class="sgot-btn" id="add-item-row">+ Agregar producto</button>
+                <button type="button" class="sgot-btn sgot-btn-quiet" id="add-item-row">+ Agregar producto</button>
             </div>
         </section>
 
         <template id="empty-item-form">
             <tr data-dynamic-row>
-                <td>
+                <td class="sgot-col-wo-item" data-label="Ítem de orden de trabajo">
                     {{ formset.empty_form.id }}
                     {{ formset.empty_form.work_order_item }}
                 </td>
-                <td>
+                <td class="sgot-col-product" data-label="Producto / material adicional">
                     {{ formset.empty_form.product }}
                 </td>
-                <td>
+                <td class="sgot-col-qty" data-label="Cantidad entregada">
                     {{ formset.empty_form.delivered_quantity }}
                 </td>
-                <td>
+                <td class="sgot-col-notes" data-label="Notas">
                     {{ formset.empty_form.notes }}
                 </td>
-                <td>
+                <td class="sgot-col-delete" data-label="Quitar">
                     <button type="button" class="sgot-btn sgot-btn-row-remove js-remove-item-row">Quitar</button>
                 </td>
             </tr>
         </template>
 
         <div class="sgot-form-actions">
+            <a href="{% url 'workorders:workorder_detail' work_order.pk %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
             <button type="submit" class="sgot-btn sgot-btn-primary">Guardar salida</button>
-            <a href="{% url 'workorders:workorder_detail' work_order.pk %}" class="sgot-btn">Cancelar</a>
         </div>
     </form>
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
     <script>
     (function () {
+        function initSearchableSelect(selectEl, placeholder) {
+            if (!selectEl || selectEl.tomselect) {
+                return;
+            }
+            const emptyOption = selectEl.querySelector('option[value=""]');
+            if (emptyOption) {
+                emptyOption.textContent = "";
+            }
+            new TomSelect(selectEl, {
+                placeholder: placeholder,
+                allowEmptyOption: Boolean(emptyOption),
+                create: false,
+                maxOptions: null,
+                sortField: { field: "text", direction: "asc" },
+                dropdownParent: "body",
+                plugins: ["dropdown_input"],
+            });
+        }
+
         const tbody = document.getElementById("item-formset-body");
         const emptyTemplate = document.getElementById("empty-item-form");
         const addButton = document.getElementById("add-item-row");
@@ -149,6 +167,7 @@
 
         const prefix = totalFormsInput.name.replace(/-TOTAL_FORMS$/, "");
         const indexPattern = new RegExp("(" + prefix + "-)\\d+");
+        let syncingRowSource = false;
 
         function updateElementIndex(el, index) {
             if (el.name) {
@@ -229,6 +248,16 @@
                         option.removeAttribute("disabled");
                     }
                 });
+
+                if (select.tomselect) {
+                    Array.from(select.options).forEach(function (option) {
+                        if (!option.value || !select.tomselect.options[option.value]) {
+                            return;
+                        }
+                        select.tomselect.options[option.value].disabled = option.disabled;
+                    });
+                    select.tomselect.refreshOptions(false);
+                }
             });
         }
 
@@ -241,47 +270,109 @@
             select.addEventListener("input", syncWorkOrderItemOptions);
         }
 
-        function destroyProductSelect(row) {
-            const select = getProductSelect(row);
-            if (select && select.tomselect) {
-                select.tomselect.destroy();
+        function applyRowSourceState(row, changedField) {
+            const woSelect = getWorkOrderItemSelect(row);
+            const productSelect = getProductSelect(row);
+            const woTs = woSelect && woSelect.tomselect;
+            const productTs = productSelect && productSelect.tomselect;
+            if (!woTs || !productTs) {
+                return;
+            }
+
+            const woValue = String(woTs.getValue() || "");
+            const productValue = String(productTs.getValue() || "");
+
+            syncingRowSource = true;
+            try {
+                if (changedField === "work_order_item") {
+                    if (woValue) {
+                        if (productValue) {
+                            productTs.clear(true);
+                        }
+                        productTs.disable();
+                        woTs.enable();
+                    } else {
+                        productTs.enable();
+                    }
+                } else if (changedField === "product") {
+                    if (productValue) {
+                        if (woValue) {
+                            woTs.clear(true);
+                        }
+                        woTs.disable();
+                        productTs.enable();
+                    } else {
+                        woTs.enable();
+                    }
+                } else if (woValue && productValue) {
+                    productTs.clear(true);
+                    productTs.disable();
+                    woTs.enable();
+                } else if (woValue) {
+                    productTs.disable();
+                    woTs.enable();
+                } else if (productValue) {
+                    woTs.disable();
+                    productTs.enable();
+                } else {
+                    woTs.enable();
+                    productTs.enable();
+                }
+            } finally {
+                syncingRowSource = false;
+            }
+
+            syncWorkOrderItemOptions();
+        }
+
+        function bindRowSourceSelects(row) {
+            const woSelect = getWorkOrderItemSelect(row);
+            const productSelect = getProductSelect(row);
+            if (woSelect && woSelect.tomselect) {
+                woSelect.tomselect.on("change", function () {
+                    if (syncingRowSource) {
+                        return;
+                    }
+                    applyRowSourceState(row, "work_order_item");
+                });
+            }
+            if (productSelect && productSelect.tomselect) {
+                productSelect.tomselect.on("change", function () {
+                    if (syncingRowSource) {
+                        return;
+                    }
+                    applyRowSourceState(row, "product");
+                });
             }
         }
 
-        function initProductSelect(selectEl) {
-            if (!selectEl || selectEl.tomselect) {
-                return;
-            }
-            const emptyOption = selectEl.querySelector('option[value=""]');
-            if (emptyOption) {
-                emptyOption.textContent = "";
-            }
-            new TomSelect(selectEl, {
-                placeholder: "Buscar producto...",
-                allowEmptyOption: true,
-                create: false,
-                maxOptions: null,
-                sortField: { field: "text", direction: "asc" },
-                dropdownParent: "body",
+        function destroyRowSelects(row) {
+            [getProductSelect(row), getWorkOrderItemSelect(row)].forEach(function (select) {
+                if (select && select.tomselect) {
+                    select.tomselect.destroy();
+                }
             });
         }
 
-        function initRowProductSelect(row) {
+        function initRowSelects(row) {
             if (!row) {
                 return;
             }
-            initProductSelect(getProductSelect(row));
+            initSearchableSelect(getWorkOrderItemSelect(row), "Buscar ítem de OT...");
+            initSearchableSelect(getProductSelect(row), "Buscar producto...");
             bindWorkOrderItemSelect(getWorkOrderItemSelect(row));
+            bindRowSourceSelects(row);
+            applyRowSourceState(row);
         }
 
         function reindexRows() {
             const rows = tbody.querySelectorAll("tr");
             rows.forEach(function (row, index) {
-                destroyProductSelect(row);
+                destroyRowSelects(row);
                 row.querySelectorAll("input, select, textarea, label, button").forEach(function (el) {
                     updateElementIndex(el, index);
                 });
-                initRowProductSelect(row);
+                initRowSelects(row);
             });
             totalFormsInput.value = String(rows.length);
             syncWorkOrderItemOptions();
@@ -306,7 +397,7 @@
             syncWorkOrderItemOptions();
         }
 
-        tbody.querySelectorAll("tr").forEach(initRowProductSelect);
+        tbody.querySelectorAll("tr").forEach(initRowSelects);
         syncWorkOrderItemOptions();
 
         addButton.addEventListener("click", function () {
@@ -314,7 +405,7 @@
             const html = emptyTemplate.innerHTML.replaceAll("__prefix__", String(index));
             tbody.insertAdjacentHTML("beforeend", html);
             totalFormsInput.value = String(index + 1);
-            initRowProductSelect(tbody.lastElementChild);
+            initRowSelects(tbody.lastElementChild);
             syncWorkOrderItemOptions();
         });
 
@@ -347,7 +438,7 @@
                 return;
             }
             if (row.hasAttribute("data-dynamic-row")) {
-                destroyProductSelect(row);
+                destroyRowSelects(row);
                 row.remove();
                 reindexRows();
             } else {

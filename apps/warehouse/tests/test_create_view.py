@@ -326,6 +326,24 @@ class WarehouseOutputCreateViewTests(TestCase):
         self.assertEqual(WarehouseOutput.objects.count(), 0)
         self.assertEqual(WarehouseOutputItem.objects.count(), 0)
 
+    def test_row_with_item_and_product_does_not_create_output(self):
+        response = self._post_create(
+            self.admin_user,
+            self._valid_post_data(
+                items=[
+                    {
+                        "work_order_item": str(self.work_order_item.pk),
+                        "product": str(self.extra_product.pk),
+                        "delivered_quantity": "2.00",
+                    }
+                ]
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(WarehouseOutput.objects.count(), 0)
+        self.assertEqual(WarehouseOutputItem.objects.count(), 0)
+
     def test_order_not_equipment_ok_does_not_create_output(self):
         work_order = self._create_work_order(
             number="9102",

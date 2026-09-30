@@ -21,10 +21,32 @@ class CustomerModelTests(TestCase):
         self.assertEqual(customer.customer_code, "C-1001")
         self.assertEqual(customer.code_system, Customer.CodeSystem.CENTURION)
 
-    def test_str_returns_trade_name(self):
+    def test_str_returns_trade_name_when_code_is_missing(self):
         customer = Customer.objects.create(trade_name="Seguridad Andina")
 
         self.assertEqual(str(customer), "Seguridad Andina")
+        self.assertNotIn("None", str(customer))
+        self.assertNotIn(" - ", str(customer))
+
+    def test_str_includes_customer_code_when_present(self):
+        customer = Customer.objects.create(
+            trade_name="Alarmas del Norte",
+            customer_code="C-1001",
+        )
+
+        self.assertEqual(str(customer), "Alarmas del Norte - C-1001")
+
+    def test_str_never_shows_none_for_blank_or_null_code(self):
+        without_code = Customer.objects.create(trade_name="Cliente Detalle")
+        blank_code = Customer.objects.create(
+            trade_name="Cliente En Blanco",
+            customer_code="",
+        )
+
+        self.assertEqual(str(without_code), "Cliente Detalle")
+        self.assertEqual(str(blank_code), "Cliente En Blanco")
+        self.assertNotIn("None", str(without_code))
+        self.assertNotIn("None", str(blank_code))
 
     def test_ordering_by_trade_name(self):
         Customer.objects.create(trade_name="Zeta Protección")

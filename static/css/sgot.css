@@ -45,6 +45,8 @@
     --info: #0369a1;
     --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
     --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.08);
+    --bg-dropdown: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    --dropdown-blur: 12px;
 
     --text-disabled: #9aa1b0;
     --danger-bg: rgba(220, 38, 38, 0.1);
@@ -83,6 +85,7 @@
     --info: #22d3ee;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --bg-dropdown: color-mix(in srgb, var(--bg-surface) 78%, transparent);
     --text-disabled: #6e7076;
     --danger-bg: rgba(248, 113, 113, 0.1);
     --danger-border: rgba(248, 113, 113, 0.35);
@@ -423,18 +426,39 @@ a.sgot-btn-danger {
 }
 
 .sgot-page-header {
-    margin-bottom: 1.25rem;
+    margin-bottom: 16px;
 }
 
 .sgot-page-header h1 {
-    margin: 0 0 0.35rem;
-    font-size: 1.45rem;
-    font-weight: 600;
+    margin: 0 0 4px;
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
 }
 
 .sgot-page-header p {
     margin: 0;
     color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.sgot-page-header p + p {
+    margin-top: 2px;
+}
+
+.sgot-returns-header h1 {
+    margin-bottom: 8px;
+    font-size: 1.75rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.sgot-returns-header p:first-of-type {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 500;
 }
 
 .sgot-card {
@@ -610,10 +634,26 @@ a.sgot-btn-danger {
     gap: 1.25rem;
 }
 
+.sgot-workorder-form,
+.sgot-warehouse-form {
+    gap: 16px;
+}
+
 .sgot-form-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 12px 20px;
+}
+
+.sgot-workorder-form .sgot-field label,
+.sgot-warehouse-form .sgot-field label {
+    margin-bottom: 4px;
+}
+
+.sgot-workorder-form textarea,
+.sgot-warehouse-form textarea {
+    min-height: 5rem;
+    height: 5rem;
 }
 
 .sgot-field-wide {
@@ -801,6 +841,44 @@ a.sgot-btn-danger {
     color: var(--text-muted);
 }
 
+.sgot-returns-table {
+    min-width: 42rem;
+}
+
+.sgot-returns-table .sgot-col-origin {
+    width: 8.5rem;
+    white-space: nowrap;
+}
+
+.sgot-returns-table .sgot-col-qty {
+    width: 8.5rem;
+}
+
+.sgot-returns-table .sgot-qty-readonly {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.sgot-returns-table .sgot-qty-used {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.sgot-returns-table .sgot-col-qty-edit {
+    width: 8rem;
+}
+
+.sgot-form .sgot-returns-table .sgot-col-qty-edit input[type="number"] {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    max-width: 6.25rem;
+    margin-left: auto;
+    display: block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 550;
+}
+
 .sgot-table .sgot-col-wo-item {
     width: 16rem;
     min-width: 12rem;
@@ -861,21 +939,78 @@ a.sgot-btn-danger {
 }
 
 .sgot-formset-toolbar {
-    padding: 12px 16px;
+    padding: 10px 16px;
     border-top: 1px solid var(--border-subtle);
     background: var(--bg-surface-elevated);
 }
 
+.sgot-formset-table .sgot-col-product {
+    width: 42%;
+    min-width: 14rem;
+}
+
+.sgot-formset-table .sgot-col-wo-item {
+    width: 26%;
+    min-width: 12rem;
+}
+
+.sgot-formset-table .sgot-col-wo-item + .sgot-col-product {
+    width: 26%;
+    min-width: 12rem;
+}
+
+.sgot-formset-table .sgot-col-qty {
+    width: 9rem;
+}
+
+.sgot-formset-table .sgot-col-notes {
+    width: auto;
+}
+
+.sgot-formset-table .sgot-col-delete {
+    width: 6.75rem;
+    text-align: right;
+}
+
+.sgot-formset-table thead th.sgot-col-qty,
+.sgot-formset-table thead th.sgot-col-delete {
+    text-align: right;
+}
+
+.sgot-formset-table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.sgot-formset-table .ts-wrapper {
+    min-width: 0;
+}
+
+.sgot-formset-table .sgot-col-qty input[type="number"] {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    max-width: 6.25rem;
+    margin-left: auto;
+    display: block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 550;
+}
+
+.sgot-formset-table .sgot-col-delete .sgot-btn-row-remove {
+    width: 100%;
+}
+
 .sgot-btn-row-remove {
-    min-height: 28px;
-    padding: 0 8px;
+    min-height: 32px;
+    padding: 0 10px;
     font-size: 0.8125rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .sgot-btn-row-remove:hover {
     background: var(--danger-bg);
-    border-color: transparent;
+    border-color: var(--danger-border);
     color: var(--danger);
 }
 
@@ -885,6 +1020,10 @@ a.sgot-btn-danger {
 .sgot-form .ts-wrapper {
     width: 100%;
     min-width: 12rem;
+}
+
+.sgot-form .sgot-formset-table .ts-wrapper {
+    min-width: 0;
 }
 
 .sgot-form .ts-wrapper .ts-control,
@@ -905,6 +1044,28 @@ a.sgot-btn-danger {
     line-height: 1.4;
     color-scheme: inherit;
     transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.sgot-form .ts-wrapper.disabled .ts-control,
+.sgot-form .ts-wrapper.disabled.single .ts-control,
+.sgot-form .ts-wrapper.disabled.single.input-active .ts-control {
+    background: var(--bg-hover);
+    background-color: var(--bg-hover);
+    color: var(--text-disabled);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.sgot-form .ts-wrapper.disabled .ts-control .item,
+.sgot-form .ts-wrapper.disabled .ts-control input {
+    color: var(--text-disabled) !important;
+    -webkit-text-fill-color: var(--text-disabled);
+    cursor: not-allowed;
+}
+
+.sgot-form .ts-wrapper.disabled .ts-control input::placeholder {
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
 }
 
 .sgot-form .ts-wrapper.focus .ts-control,
@@ -975,26 +1136,79 @@ a.sgot-btn-danger {
 .ts-dropdown,
 .ts-dropdown.plugin-dropdown_input,
 .ts-dropdown.single {
+    max-width: calc(100vw - 24px);
+    overflow: hidden;
     background: var(--bg-surface) !important;
     background-color: var(--bg-surface) !important;
     border: 1px solid var(--border-default) !important;
-    border-radius: var(--radius-control);
+    border-radius: 12px;
     color: var(--text-primary) !important;
     box-shadow: var(--shadow-md);
     z-index: 2000;
 }
 
+@supports ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+    .ts-dropdown,
+    .ts-dropdown.plugin-dropdown_input,
+    .ts-dropdown.single {
+        background: var(--bg-dropdown) !important;
+        background-color: var(--bg-dropdown) !important;
+        backdrop-filter: blur(var(--dropdown-blur));
+        -webkit-backdrop-filter: blur(var(--dropdown-blur));
+    }
+}
+
 .ts-dropdown .ts-dropdown-content {
-    background: var(--bg-surface) !important;
-    background-color: var(--bg-surface) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.ts-dropdown .dropdown-input-wrap {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: transparent !important;
+}
+
+.ts-dropdown .dropdown-input,
+.ts-dropdown.plugin-dropdown_input .dropdown-input,
+.ts-dropdown input.dropdown-input {
+    width: 100%;
+    min-height: 32px;
+    margin: 0;
+    padding: 6px 10px !important;
+    border: 1px solid var(--border-default) !important;
+    border-radius: var(--radius-control);
+    background: var(--bg-surface-elevated) !important;
+    background-color: var(--bg-surface-elevated) !important;
+    color: var(--text-primary) !important;
+    caret-color: var(--text-primary) !important;
+    box-shadow: none !important;
+    font: inherit;
+    font-size: 0.8125rem !important;
+    line-height: 1.4 !important;
+    color-scheme: inherit;
+    -webkit-text-fill-color: var(--text-primary);
+}
+
+.ts-dropdown .dropdown-input::placeholder,
+.ts-dropdown input.dropdown-input::placeholder {
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
+}
+
+.ts-dropdown .dropdown-input:focus,
+.ts-dropdown .dropdown-input:focus-visible {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent) !important;
 }
 
 .ts-dropdown .option,
 .ts-dropdown .no-results {
-    background: var(--bg-surface) !important;
-    background-color: var(--bg-surface) !important;
+    background: transparent !important;
+    background-color: transparent !important;
     color: var(--text-primary) !important;
-    padding: 0.45rem 0.75rem;
+    padding: 8px 12px;
 }
 
 .ts-dropdown .no-results {
@@ -1002,8 +1216,8 @@ a.sgot-btn-danger {
 }
 
 .ts-dropdown .option.selected {
-    background: var(--bg-hover) !important;
-    background-color: var(--bg-hover) !important;
+    background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+    background-color: color-mix(in srgb, var(--accent) 12%, transparent) !important;
     color: var(--text-primary) !important;
 }
 
@@ -1013,6 +1227,23 @@ a.sgot-btn-danger {
     background: var(--bg-hover) !important;
     background-color: var(--bg-hover) !important;
     color: var(--text-primary) !important;
+}
+
+.ts-dropdown .option.active {
+    background: color-mix(in srgb, var(--accent) 16%, transparent) !important;
+    background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
+}
+
+.ts-dropdown .option.disabled {
+    color: var(--text-disabled) !important;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.ts-dropdown .option.disabled:hover,
+.ts-dropdown .option.disabled.active {
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
 .ts-dropdown .highlight {
@@ -1034,16 +1265,263 @@ a.sgot-btn-danger {
     gap: 0.75rem;
 }
 
+.sgot-workorder-form > .sgot-form-actions,
+.sgot-warehouse-form > .sgot-form-actions {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
 .sgot-actions-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
 }
 
-.sgot-action-form h3 {
+.sgot-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sgot-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.sgot-detail-header-main {
+    min-width: 0;
+}
+
+.sgot-detail-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+}
+
+.sgot-detail-header h1 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1.75rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.sgot-detail-header .sgot-badge {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+}
+
+.sgot-detail-customer {
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.sgot-detail-header .sgot-btn-quiet {
+    flex-shrink: 0;
+}
+
+.sgot-summary-grid,
+.sgot-summary-secondary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px 24px;
+}
+
+.sgot-summary-secondary {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.sgot-summary-item {
+    min-width: 0;
+}
+
+.sgot-summary-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.sgot-summary-value {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.sgot-summary-secondary .sgot-summary-value {
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.sgot-actions-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px 24px;
+    align-items: start;
+}
+
+.sgot-actions-layout > .sgot-form-errors,
+.sgot-action-panel-primary {
+    grid-column: 1 / -1;
+}
+
+.sgot-action-panel-primary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.sgot-action-panel-primary .sgot-btn {
+    min-height: 36px;
+    padding: 0 16px;
+}
+
+.sgot-action-panel-secondary {
+    min-width: 0;
+    padding: 0 0 0 12px;
+    border: 0;
+    border-left: 2px solid var(--border-default);
+    border-radius: 0;
+    background: transparent;
+    gap: 10px;
+}
+
+.sgot-action-panel-secondary h3 {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
     font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.sgot-action-panel-secondary .sgot-field label {
+    margin-bottom: 4px;
+}
+
+.sgot-action-panel-secondary .sgot-form-actions {
+    margin: 0;
+}
+
+@media (max-width: 767.98px) {
+    .sgot-action-panel-primary .sgot-inline-form,
+    .sgot-action-panel-primary .sgot-btn,
+    .sgot-action-panel-secondary .sgot-form-actions,
+    .sgot-action-panel-secondary .sgot-form-actions .sgot-btn {
+        width: 100%;
+    }
+
+    .sgot-workorder-form > .sgot-form-actions,
+    .sgot-warehouse-form > .sgot-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .sgot-workorder-form > .sgot-form-actions .sgot-btn,
+    .sgot-warehouse-form > .sgot-form-actions .sgot-btn {
+        width: 100%;
+    }
+
+    .sgot-formset-table thead {
+        display: none;
+    }
+
+    .sgot-formset-table,
+    .sgot-formset-table tbody,
+    .sgot-formset-table tr,
+    .sgot-formset-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .sgot-formset-table tbody tr {
+        padding: 12px 16px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sgot-formset-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .sgot-formset-table tbody td {
+        padding: 8px 0 0;
+        border-bottom: 0;
+    }
+
+    .sgot-formset-table tbody td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        color: var(--text-muted);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .sgot-formset-table .sgot-col-wo-item,
+    .sgot-formset-table .sgot-col-product,
+    .sgot-formset-table .sgot-col-qty,
+    .sgot-formset-table .sgot-col-notes,
+    .sgot-formset-table .sgot-col-delete {
+        width: 100%;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .sgot-formset-table .sgot-col-qty input[type="number"] {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        margin-left: 0;
+        text-align: left;
+    }
+
+    .sgot-formset-table .sgot-col-delete {
+        padding-top: 12px;
+    }
+
+    .sgot-formset-toolbar .sgot-btn {
+        width: 100%;
+    }
+}
+
+.sgot-card-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.sgot-card-header-actions .sgot-btn {
+    margin-left: 0;
+}
+
+.sgot-inline-form {
+    margin: 0;
+    display: flex;
+}
+
+.sgot-card-body > .sgot-help {
+    margin: 0 0 16px;
 }
 
 @media (min-width: 768px) {
@@ -1051,12 +1529,27 @@ a.sgot-btn-danger {
         grid-template-columns: 1fr 1fr;
     }
 
-    .sgot-actions-grid {
+    .sgot-actions-grid,
+    .sgot-summary-grid,
+    .sgot-summary-secondary {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .sgot-actions-layout {
+        grid-template-columns: repeat(2, minmax(0, 22rem));
+        justify-content: start;
+    }
+
+    .sgot-summary-item-wide {
+        grid-column: 1 / -1;
     }
 }
 
 @media (min-width: 992px) {
+    .sgot-summary-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
     .sgot-app {
         min-height: 100vh;
     }
@@ -1143,6 +1636,17 @@ a.sgot-btn-danger {
     .sgot-user {
         max-width: 8rem;
         margin-left: auto;
+    }
+
+    .sgot-detail-header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .sgot-card-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-left: 0;
     }
 }
 

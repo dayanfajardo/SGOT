@@ -32,7 +32,7 @@
         <aside class="sgot-sidebar">
             <div class="sgot-brand">SGOT</div>
             <nav class="sgot-nav" aria-label="Principal">
-                <span class="sgot-nav-item is-disabled">Dashboard</span>
+                <a class="sgot-nav-item{% if request.resolver_match.url_name == 'dashboard' %} is-active{% endif %}" href="{% url 'workorders:dashboard' %}">Dashboard</a>
                 <a class="sgot-nav-item{% if request.resolver_match.url_name == 'workorder_list' %} is-active{% endif %}" href="{% url 'workorders:workorder_list' %}">Órdenes de trabajo</a>
                 <span class="sgot-nav-item is-disabled">Clientes</span>
                 <span class="sgot-nav-item is-disabled">Almacén</span>

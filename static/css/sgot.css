@@ -1652,6 +1652,7 @@ a.sgot-btn-danger {
     .sgot-main {
         flex: 1;
         min-height: 0;
+        overflow-y: auto;
     }
 }
 
@@ -1716,6 +1717,176 @@ a.sgot-btn-danger {
         width: 100%;
         justify-content: flex-start;
         margin-left: 0;
+    }
+}
+
+.sgot-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sgot-dashboard .sgot-page-header {
+    margin-bottom: 0;
+}
+
+.sgot-dashboard-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px 24px;
+}
+
+.sgot-dashboard-date {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.sgot-kpi-strip {
+    display: grid;
+    gap: 8px;
+}
+
+.sgot-kpi-strip-status {
+    grid-template-columns: 1fr;
+}
+
+.sgot-kpi-strip-plan {
+    grid-template-columns: 1fr;
+}
+
+.sgot-kpi {
+    min-width: 0;
+    padding: 12px 14px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    border-top-width: 2px;
+}
+
+.sgot-kpi-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.sgot-kpi-value {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.sgot-kpi-strip-plan .sgot-kpi {
+    padding: 14px 16px;
+}
+
+.sgot-kpi-strip-plan .sgot-kpi-value {
+    font-size: 1.75rem;
+}
+
+.sgot-kpi-received {
+    border-top-color: color-mix(in srgb, var(--text-muted) 55%, transparent);
+}
+
+.sgot-kpi-pending_equipment {
+    border-top-color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.sgot-kpi-equipment_ok {
+    border-top-color: color-mix(in srgb, var(--info) 70%, transparent);
+}
+
+.sgot-kpi-in_installation {
+    border-top-color: color-mix(in srgb, var(--warning) 70%, transparent);
+}
+
+.sgot-kpi-completed {
+    border-top-color: color-mix(in srgb, var(--success) 70%, transparent);
+}
+
+.sgot-kpi-scheduled-today {
+    border-top-color: color-mix(in srgb, var(--info) 55%, transparent);
+}
+
+.sgot-kpi-overdue,
+.sgot-kpi-upcoming {
+    border-top-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
+}
+
+.sgot-kpi-overdue.is-attention {
+    background: color-mix(in srgb, var(--warning) 8%, var(--bg-surface-elevated));
+    border-color: color-mix(in srgb, var(--warning) 28%, var(--border-subtle));
+    border-top-color: color-mix(in srgb, var(--warning) 75%, transparent);
+}
+
+.sgot-kpi-overdue.is-attention .sgot-kpi-label {
+    color: var(--warning);
+}
+
+.sgot-kpi-overdue.is-attention .sgot-kpi-value {
+    color: var(--warning);
+}
+
+.sgot-empty-ok {
+    color: var(--text-secondary);
+}
+
+.sgot-dashboard .sgot-empty {
+    padding: 20px 16px;
+}
+
+.sgot-dashboard-table {
+    min-width: 36rem;
+}
+
+.sgot-dashboard-table .sgot-col-date {
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.sgot-dashboard-table td a {
+    font-weight: 550;
+}
+
+@media (min-width: 768px) {
+    .sgot-kpi-strip-status {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .sgot-kpi-strip-plan {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 992px) {
+    .sgot-kpi-strip-status {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .sgot-dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .sgot-dashboard-date {
+        margin: 0;
     }
 }
 

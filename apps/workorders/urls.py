@@ -5,6 +5,7 @@ from apps.workorders import views
 app_name = "workorders"
 
 urlpatterns = [
+    path("dashboard/", views.dashboard, name="dashboard"),
     path("workorders/", views.work_order_list, name="workorder_list"),
     path(
         "workorders/new/",

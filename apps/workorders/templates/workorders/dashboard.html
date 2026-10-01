@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="sgot-dashboard">
+    <header class="sgot-page-header sgot-dashboard-header">
+        <div>
+            <h1>Dashboard</h1>
+            <p>Resumen operativo de órdenes de trabajo</p>
+        </div>
+        <p class="sgot-dashboard-date">{{ today|date:"j M Y" }}</p>
+    </header>
+
+    <section class="sgot-kpi-strip sgot-kpi-strip-status" aria-label="Estado del flujo">
+        <article class="sgot-kpi sgot-kpi-received">
+            <span class="sgot-kpi-label">Recibidas</span>
+            <p class="sgot-kpi-value">{{ received_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-pending_equipment">
+            <span class="sgot-kpi-label">Pendientes de equipos</span>
+            <p class="sgot-kpi-value">{{ pending_equipment_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-equipment_ok">
+            <span class="sgot-kpi-label">Equipos OK</span>
+            <p class="sgot-kpi-value">{{ equipment_ok_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-in_installation">
+            <span class="sgot-kpi-label">En instalación</span>
+            <p class="sgot-kpi-value">{{ in_installation_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-completed">
+            <span class="sgot-kpi-label">Completadas</span>
+            <p class="sgot-kpi-value">{{ completed_count }}</p>
+        </article>
+    </section>
+
+    <section class="sgot-kpi-strip sgot-kpi-strip-plan" aria-label="Planificación">
+        <article class="sgot-kpi sgot-kpi-scheduled-today">
+            <span class="sgot-kpi-label">Programadas hoy</span>
+            <p class="sgot-kpi-value">{{ scheduled_today_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-overdue{% if overdue_count %} is-attention{% endif %}">
+            <span class="sgot-kpi-label">Atrasadas</span>
+            <p class="sgot-kpi-value">{{ overdue_count }}</p>
+        </article>
+        <article class="sgot-kpi sgot-kpi-upcoming">
+            <span class="sgot-kpi-label">Próximas</span>
+            <p class="sgot-kpi-value">{{ upcoming_count }}</p>
+        </article>
+    </section>
+
+    <section class="sgot-card">
+        <header class="sgot-card-header">
+            <h2>Requieren atención</h2>
+        </header>
+        {% if overdue_orders %}
+        <div class="table-responsive">
+            <table class="sgot-table sgot-dashboard-table">
+                <thead>
+                    <tr>
+                        <th>OT</th>
+                        <th>Cliente</th>
+                        <th>Técnico</th>
+                        <th>Fecha programada</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for work_order in overdue_orders %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'workorders:workorder_detail' work_order.pk %}">{{ work_order.number }}</a>
+                        </td>
+                        <td>{{ work_order.customer }}</td>
+                        <td>{% if work_order.assigned_technician %}{{ work_order.assigned_technician }}{% else %}—{% endif %}</td>
+                        <td class="sgot-col-date">{{ work_order.scheduled_date|date:"j M Y" }}</td>
+                        <td>
+                            <span class="sgot-badge sgot-badge-{{ work_order.status|lower }}">
+                                {{ work_order.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="sgot-empty sgot-empty-ok">No hay órdenes atrasadas.</p>
+        {% endif %}
+    </section>
+
+    <section class="sgot-card">
+        <header class="sgot-card-header">
+            <h2>Próximas instalaciones</h2>
+        </header>
+        {% if upcoming_orders %}
+        <div class="table-responsive">
+            <table class="sgot-table sgot-dashboard-table">
+                <thead>
+                    <tr>
+                        <th>OT</th>
+                        <th>Cliente</th>
+                        <th>Técnico</th>
+                        <th>Fecha programada</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for work_order in upcoming_orders %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'workorders:workorder_detail' work_order.pk %}">{{ work_order.number }}</a>
+                        </td>
+                        <td>{{ work_order.customer }}</td>
+                        <td>{% if work_order.assigned_technician %}{{ work_order.assigned_technician }}{% else %}—{% endif %}</td>
+                        <td class="sgot-col-date">{{ work_order.scheduled_date|date:"j M Y" }}</td>
+                        <td>
+                            <span class="sgot-badge sgot-badge-{{ work_order.status|lower }}">
+                                {{ work_order.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay instalaciones próximas programadas.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -211,6 +211,81 @@ def _history_presentation(entries):
             }
         )
     return rows
+
+
+@login_required
+def dashboard(request):
+    if not request.user.has_perm("workorders.view_workorder"):
+        raise PermissionDenied
+
+    work_orders = WorkOrder.objects.all()
+    if request.user.groups.filter(name=COMMERCIAL_GROUP).exists():
+        work_orders = work_orders.filter(commercial=request.user)
+
+    today = timezone.localdate()
+    not_completed = ~Q(status=WorkOrder.Status.COMPLETED)
+    metrics = work_orders.aggregate(
+        received_count=Count("id", filter=Q(status=WorkOrder.Status.RECEIVED)),
+        pending_equipment_count=Count(
+            "id",
+            filter=Q(status=WorkOrder.Status.PENDING_EQUIPMENT),
+        ),
+        equipment_ok_count=Count(
+            "id",
+            filter=Q(status=WorkOrder.Status.EQUIPMENT_OK),
+        ),
+        in_installation_count=Count(
+            "id",
+            filter=Q(status=WorkOrder.Status.IN_INSTALLATION),
+        ),
+        completed_count=Count("id", filter=Q(status=WorkOrder.Status.COMPLETED)),
+        scheduled_today_count=Count(
+            "id",
+            filter=Q(scheduled_date=today) & not_completed,
+        ),
+        overdue_count=Count(
+            "id",
+            filter=Q(scheduled_date__lt=today) & not_completed,
+        ),
+        upcoming_count=Count(
+            "id",
+            filter=Q(scheduled_date__gt=today) & not_completed,
+        ),
+    )
+
+    overdue_orders = (
+        work_orders.filter(scheduled_date__lt=today)
+        .exclude(status=WorkOrder.Status.COMPLETED)
+        .select_related(
+            "customer",
+            "assigned_technician",
+            "commercial",
+            "work_type",
+        )
+        .order_by("scheduled_date", "number")[:8]
+    )
+    upcoming_orders = (
+        work_orders.filter(scheduled_date__gt=today)
+        .exclude(status=WorkOrder.Status.COMPLETED)
+        .select_related(
+            "customer",
+            "assigned_technician",
+            "commercial",
+            "work_type",
+        )
+        .order_by("scheduled_date", "number")[:8]
+    )
+
+    return render(
+        request,
+        "workorders/dashboard.html",
+        {
+            "today": today,
+            "overdue_orders": overdue_orders,
+            "upcoming_orders": upcoming_orders,
+            **metrics,
+        },
+    )
 
 
 @login_required

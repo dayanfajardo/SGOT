@@ -519,6 +519,75 @@ a.sgot-btn-danger {
     text-align: center;
 }
 
+.sgot-filters {
+    gap: 0;
+    margin: 0 0 12px;
+}
+
+.sgot-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px 10px;
+}
+
+.sgot-filters .sgot-field {
+    margin: 0;
+    min-width: 0;
+}
+
+.sgot-filters .sgot-field label {
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+}
+
+.sgot-filters-search {
+    flex: 1 1 16rem;
+}
+
+.sgot-filters .sgot-field:not(.sgot-filters-search) {
+    flex: 1 1 9rem;
+}
+
+.sgot-filters-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.sgot-filters-actions .sgot-btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .sgot-filters-search,
+    .sgot-filters .sgot-field:not(.sgot-filters-search),
+    .sgot-filters-actions {
+        flex: 1 1 100%;
+    }
+
+    .sgot-filters-actions .sgot-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .sgot-filters-search {
+        flex: 1 1 100%;
+    }
+
+    .sgot-filters .sgot-field:not(.sgot-filters-search) {
+        flex: 1 1 calc(50% - 5px);
+    }
+
+    .sgot-filters-actions {
+        flex: 1 1 100%;
+    }
+}
+
 .sgot-table {
     width: 100%;
     margin: 0;

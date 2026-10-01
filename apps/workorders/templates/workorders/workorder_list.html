@@ -8,6 +8,43 @@
         <p>Consulta y seguimiento de órdenes registradas</p>
     </header>
 
+    <form method="get" class="sgot-form sgot-filters" role="search">
+        {% if filter_form.non_field_errors %}
+        <div class="sgot-form-errors" role="alert">
+            {{ filter_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="sgot-filters-row">
+            <div class="sgot-field sgot-filters-search">
+                {{ filter_form.q }}
+                {{ filter_form.q.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.status }}
+                {{ filter_form.status.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.technician }}
+                {{ filter_form.technician.errors }}
+            </div>
+            {% if filter_form.commercial %}
+            <div class="sgot-field">
+                {{ filter_form.commercial }}
+                {{ filter_form.commercial.errors }}
+            </div>
+            {% endif %}
+            <div class="sgot-field">
+                <label for="{{ filter_form.scheduled_date.id_for_label }}">{{ filter_form.scheduled_date.label }}</label>
+                {{ filter_form.scheduled_date }}
+                {{ filter_form.scheduled_date.errors }}
+            </div>
+            <div class="sgot-filters-actions">
+                <button type="submit" class="sgot-btn sgot-btn-primary">Filtrar</button>
+                <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn sgot-btn-quiet">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
     <section class="sgot-card">
         {% if work_orders %}
         <div class="table-responsive">
@@ -45,6 +82,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        {% elif has_work_orders %}
+        <div class="sgot-empty-action">
+            <p>No encontramos órdenes con los filtros seleccionados.</p>
+            <a href="{% url 'workorders:workorder_list' %}" class="sgot-btn sgot-btn-secondary">Limpiar filtros</a>
         </div>
         {% else %}
         <p class="sgot-empty">No hay órdenes de trabajo para mostrar.</p>

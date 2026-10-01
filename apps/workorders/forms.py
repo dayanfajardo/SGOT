@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.forms import inlineformset_factory
 
+from apps.accounts.constants import COMMERCIAL_GROUP
 from apps.catalog.models import Product, Technician
 
 from .models import WorkOrder, WorkOrderItem
@@ -95,6 +96,56 @@ class WorkOrderScheduleForm(forms.Form):
         self.fields["technician"].queryset = Technician.objects.filter(
             active=True,
         ).order_by("first_name", "last_name")
+
+
+class WorkOrderFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar OT o cliente...",
+                "aria-label": "Buscar OT o cliente",
+            },
+        ),
+    )
+    status = forms.ChoiceField(
+        required=False,
+        label="",
+        choices=[("", "Todos los estados"), *WorkOrder.Status.choices],
+        widget=forms.Select(attrs={"aria-label": "Estado"}),
+    )
+    technician = forms.ModelChoiceField(
+        queryset=Technician.objects.none(),
+        required=False,
+        label="",
+        empty_label="Todos los técnicos",
+        widget=forms.Select(attrs={"aria-label": "Técnico"}),
+    )
+    commercial = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="",
+        empty_label="Todos los comerciales",
+        widget=forms.Select(attrs={"aria-label": "Comercial"}),
+    )
+    scheduled_date = forms.DateField(
+        required=False,
+        label="Fecha programada",
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+
+    def __init__(self, *args, hide_commercial=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["technician"].queryset = Technician.objects.filter(
+            active=True,
+        ).order_by("first_name", "last_name")
+        if hide_commercial:
+            self.fields.pop("commercial")
+        else:
+            self.fields["commercial"].queryset = User.objects.filter(
+                groups__name=COMMERCIAL_GROUP,
+            ).order_by("username")
 
 
 class WorkOrderStatusForm(forms.Form):

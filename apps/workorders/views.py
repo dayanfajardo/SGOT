@@ -4,12 +4,15 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.accounts.constants import COMMERCIAL_GROUP
 from apps.workorders.forms import (
     WorkOrderCreateForm,
+    WorkOrderFilterForm,
     WorkOrderItemFormSet,
     WorkOrderScheduleForm,
     WorkOrderStatusForm,
@@ -222,13 +225,45 @@ def work_order_list(request):
         "assigned_technician",
     )
 
-    if request.user.groups.filter(name="Comercial").exists():
+    is_commercial = request.user.groups.filter(name=COMMERCIAL_GROUP).exists()
+    if is_commercial:
         work_orders = work_orders.filter(commercial=request.user)
+
+    has_work_orders = work_orders.exists()
+    filter_form = WorkOrderFilterForm(
+        request.GET or None,
+        hide_commercial=is_commercial,
+    )
+
+    if filter_form.is_valid():
+        q = filter_form.cleaned_data.get("q")
+        if q:
+            work_orders = work_orders.filter(
+                Q(number__icontains=q)
+                | Q(customer__trade_name__icontains=q)
+                | Q(customer__customer_code__icontains=q)
+            )
+        status = filter_form.cleaned_data.get("status")
+        if status:
+            work_orders = work_orders.filter(status=status)
+        technician = filter_form.cleaned_data.get("technician")
+        if technician:
+            work_orders = work_orders.filter(assigned_technician=technician)
+        commercial = filter_form.cleaned_data.get("commercial")
+        if commercial:
+            work_orders = work_orders.filter(commercial=commercial)
+        scheduled_date = filter_form.cleaned_data.get("scheduled_date")
+        if scheduled_date:
+            work_orders = work_orders.filter(scheduled_date=scheduled_date)
 
     return render(
         request,
         "workorders/workorder_list.html",
-        {"work_orders": work_orders},
+        {
+            "work_orders": work_orders,
+            "filter_form": filter_form,
+            "has_work_orders": has_work_orders,
+        },
     )
 
 

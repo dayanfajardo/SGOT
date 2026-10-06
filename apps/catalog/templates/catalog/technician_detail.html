@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ technician }}{% endblock %}
+
+{% block content %}
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
+                <h1>{{ technician }}</h1>
+                {% if technician.active %}
+                <span class="sgot-badge sgot-badge-active">Activo</span>
+                {% else %}
+                <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="sgot-header-actions">
+            {% if perms.catalog.change_technician %}
+            <a href="{% url 'catalog:technician_update' technician.pk %}" class="sgot-btn sgot-btn-primary">Editar técnico</a>
+            <form method="post" action="{% url 'catalog:technician_toggle_active' technician.pk %}" class="sgot-inline-form">
+                {% csrf_token %}
+                {% if technician.active %}
+                <button type="submit" class="sgot-btn sgot-btn-danger">Desactivar</button>
+                {% else %}
+                <button type="submit" class="sgot-btn sgot-btn-secondary">Activar</button>
+                {% endif %}
+            </form>
+            {% endif %}
+            <a href="{% url 'catalog:technician_list' %}" class="sgot-btn sgot-btn-quiet">Volver a técnicos</a>
+        </div>
+    </header>
+
+    <div class="sgot-detail">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Nombre</span>
+                        <p class="sgot-summary-value">{{ technician.first_name }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Apellido</span>
+                        <p class="sgot-summary-value">{% if technician.last_name %}{{ technician.last_name }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Tipo</span>
+                        <p class="sgot-summary-value">{{ technician.get_technician_type_display }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Teléfono</span>
+                        <p class="sgot-summary-value">{% if technician.phone %}{{ technician.phone }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Estado</span>
+                        <p class="sgot-summary-value">
+                            {% if technician.active %}Activo{% else %}Inactivo{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de creación</span>
+                        <p class="sgot-summary-value">{{ technician.created_at }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Última actualización</span>
+                        <p class="sgot-summary-value">{{ technician.updated_at }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Editar técnico{% else %}Nuevo técnico{% endif %}{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header">
+        <h1>{% if is_edit %}Editar técnico{% else %}Nuevo técnico{% endif %}</h1>
+    </header>
+
+    <form method="post" class="sgot-form sgot-customer-form">
+        {% csrf_token %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                {% if form.non_field_errors %}
+                <div class="sgot-form-errors" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                        {{ form.first_name }}
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                        {{ form.last_name }}
+                        {{ form.last_name.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                        {{ form.phone.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.technician_type.id_for_label }}">{{ form.technician_type.label }}</label>
+                        {{ form.technician_type }}
+                        {{ form.technician_type.errors }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="sgot-form-actions">
+            {% if is_edit %}
+            <a href="{% url 'catalog:technician_detail' technician.pk %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar cambios</button>
+            {% else %}
+            <a href="{% url 'catalog:technician_list' %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar técnico</button>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Técnicos{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header sgot-page-header-split">
+        <div>
+            <h1>Técnicos</h1>
+            <p>Consulta y gestión del personal técnico</p>
+        </div>
+        {% if perms.catalog.add_technician %}
+        <a href="{% url 'catalog:technician_create' %}" class="sgot-btn sgot-btn-primary">Nuevo técnico</a>
+        {% endif %}
+    </header>
+
+    <form method="get" class="sgot-form sgot-filters" role="search">
+        {% if filter_form.non_field_errors %}
+        <div class="sgot-form-errors" role="alert">
+            {{ filter_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="sgot-filters-row">
+            <div class="sgot-field sgot-filters-search">
+                {{ filter_form.q }}
+                {{ filter_form.q.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.technician_type }}
+                {{ filter_form.technician_type.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.active }}
+                {{ filter_form.active.errors }}
+            </div>
+            <div class="sgot-filters-actions">
+                <button type="submit" class="sgot-btn sgot-btn-primary">Filtrar</button>
+                <a href="{% url 'catalog:technician_list' %}" class="sgot-btn sgot-btn-quiet">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <section class="sgot-card">
+        {% if technicians %}
+        <div class="table-responsive">
+            <table class="sgot-table">
+                <thead>
+                    <tr>
+                        <th>Técnico</th>
+                        <th>Tipo</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for technician in technicians %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'catalog:technician_detail' technician.pk %}">{{ technician }}</a>
+                        </td>
+                        <td>{{ technician.get_technician_type_display }}</td>
+                        <td>{% if technician.phone %}{{ technician.phone }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if technician.active %}
+                            <span class="sgot-badge sgot-badge-active">Activo</span>
+                            {% else %}
+                            <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif has_technicians %}
+        <div class="sgot-empty-action">
+            <p>No encontramos técnicos con los filtros seleccionados.</p>
+            <a href="{% url 'catalog:technician_list' %}" class="sgot-btn sgot-btn-secondary">Limpiar filtros</a>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay técnicos registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

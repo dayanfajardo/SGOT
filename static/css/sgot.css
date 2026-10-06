@@ -721,6 +721,18 @@ a.sgot-btn-danger {
     letter-spacing: 0;
 }
 
+.sgot-badge-active {
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 32%, transparent);
+}
+
+.sgot-badge-inactive {
+    background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+    color: var(--text-secondary);
+    border-color: color-mix(in srgb, var(--text-muted) 28%, transparent);
+}
+
 .sgot-form {
     display: flex;
     flex-direction: column;

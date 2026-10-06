@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header sgot-page-header-split">
+        <div>
+            <h1>Clientes</h1>
+            <p>Consulta y gestión de clientes registrados</p>
+        </div>
+        {% if perms.customers.add_customer %}
+        <a href="{% url 'customers:customer_create' %}" class="sgot-btn sgot-btn-primary">Nuevo cliente</a>
+        {% endif %}
+    </header>
+
+    <form method="get" class="sgot-form sgot-filters" role="search">
+        {% if filter_form.non_field_errors %}
+        <div class="sgot-form-errors" role="alert">
+            {{ filter_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="sgot-filters-row">
+            <div class="sgot-field sgot-filters-search">
+                {{ filter_form.q }}
+                {{ filter_form.q.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.code_system }}
+                {{ filter_form.code_system.errors }}
+            </div>
+            <div class="sgot-filters-actions">
+                <button type="submit" class="sgot-btn sgot-btn-primary">Filtrar</button>
+                <a href="{% url 'customers:customer_list' %}" class="sgot-btn sgot-btn-quiet">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <section class="sgot-card">
+        {% if customers %}
+        <div class="table-responsive">
+            <table class="sgot-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Código</th>
+                        <th>Sistema</th>
+                        <th>Documento / NIT</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'customers:customer_detail' customer.pk %}">{{ customer.trade_name }}</a>
+                            {% if customer.legal_name %}
+                            <span class="sgot-table-secondary">{{ customer.legal_name }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if customer.customer_code %}{{ customer.customer_code }}{% else %}—{% endif %}</td>
+                        <td>{% if customer.code_system %}{{ customer.get_code_system_display }}{% else %}—{% endif %}</td>
+                        <td>{% if customer.document %}{{ customer.document }}{% else %}—{% endif %}</td>
+                        <td>{% if customer.phone %}{{ customer.phone }}{% else %}—{% endif %}</td>
+                        <td>{% if customer.email %}{{ customer.email }}{% else %}—{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif has_customers %}
+        <div class="sgot-empty-action">
+            <p>No encontramos clientes con los filtros seleccionados.</p>
+            <a href="{% url 'customers:customer_list' %}" class="sgot-btn sgot-btn-secondary">Limpiar filtros</a>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay clientes registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

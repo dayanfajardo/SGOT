@@ -60,7 +60,7 @@ class CustomerModelTests(TestCase):
             ["Alfa Alarmas", "Norte Electrónica", "Zeta Protección"],
         )
 
-    def test_unique_code_system_and_customer_code(self):
+    def test_duplicate_customer_code_in_same_system_is_not_allowed(self):
         Customer.objects.create(
             customer_code="C-2002",
             code_system=Customer.CodeSystem.CENTURION,
@@ -75,20 +75,24 @@ class CustomerModelTests(TestCase):
                     trade_name="Cliente Duplicado",
                 )
 
-    def test_same_customer_code_allowed_in_different_systems(self):
-        centurion_customer = Customer.objects.create(
+    def test_duplicate_customer_code_in_different_system_is_not_allowed(self):
+        Customer.objects.create(
             customer_code="C-3003",
             code_system=Customer.CodeSystem.CENTURION,
             trade_name="Cliente Centurión",
         )
-        arion_customer = Customer.objects.create(
-            customer_code="C-3003",
-            code_system=Customer.CodeSystem.ARION,
-            trade_name="Cliente Arion",
-        )
 
-        self.assertNotEqual(centurion_customer.pk, arion_customer.pk)
-        self.assertEqual(
-            Customer.objects.filter(customer_code="C-3003").count(),
-            2,
-        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Customer.objects.create(
+                    customer_code="C-3003",
+                    code_system=Customer.CodeSystem.ARION,
+                    trade_name="Cliente Arion",
+                )
+
+    def test_multiple_customers_without_code_are_allowed(self):
+        first = Customer.objects.create(trade_name="Cliente Sin Código 1")
+        second = Customer.objects.create(trade_name="Cliente Sin Código 2")
+
+        self.assertNotEqual(first.pk, second.pk)
+        self.assertEqual(Customer.objects.filter(customer_code__isnull=True).count(), 2)

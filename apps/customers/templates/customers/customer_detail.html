@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.trade_name }}{% endblock %}
+
+{% block content %}
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
+                <h1>{{ customer.trade_name }}</h1>
+            </div>
+            {% if customer.customer_code or customer.code_system %}
+            <p class="sgot-detail-customer">
+                {% if customer.customer_code %}{{ customer.customer_code }}{% endif %}
+                {% if customer.customer_code and customer.code_system %} · {% endif %}
+                {% if customer.code_system %}{{ customer.get_code_system_display }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <div class="sgot-header-actions">
+            {% if perms.customers.change_customer %}
+            <a href="{% url 'customers:customer_update' customer.pk %}" class="sgot-btn sgot-btn-primary">Editar cliente</a>
+            {% endif %}
+            <a href="{% url 'customers:customer_list' %}" class="sgot-btn sgot-btn-quiet">Volver a clientes</a>
+        </div>
+    </header>
+
+    <div class="sgot-detail">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Nombre comercial</span>
+                        <p class="sgot-summary-value">{{ customer.trade_name }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Razón social</span>
+                        <p class="sgot-summary-value">{% if customer.legal_name %}{{ customer.legal_name }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Documento / NIT</span>
+                        <p class="sgot-summary-value">{% if customer.document %}{{ customer.document }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Código de cliente</span>
+                        <p class="sgot-summary-value">{% if customer.customer_code %}{{ customer.customer_code }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Sistema</span>
+                        <p class="sgot-summary-value">{% if customer.code_system %}{{ customer.get_code_system_display }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Teléfono</span>
+                        <p class="sgot-summary-value">{% if customer.phone %}{{ customer.phone }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Correo electrónico</span>
+                        <p class="sgot-summary-value">{% if customer.email %}{{ customer.email }}{% else %}—{% endif %}</p>
+                    </div>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de creación</span>
+                        <p class="sgot-summary-value">{{ customer.created_at }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Última actualización</span>
+                        <p class="sgot-summary-value">{{ customer.updated_at }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

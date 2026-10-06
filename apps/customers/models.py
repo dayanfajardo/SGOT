@@ -13,6 +13,7 @@ class Customer(models.Model):
         max_length=20,
         blank=True,
         null=True,
+        unique=True,
     )
     code_system = models.CharField(
         "sistema de código",
@@ -57,12 +58,6 @@ class Customer(models.Model):
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
         ordering = ["trade_name"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["code_system", "customer_code"],
-                name="unique_customer_code_per_system",
-            ),
-        ]
 
     def __str__(self):
         code = (self.customer_code or "").strip()

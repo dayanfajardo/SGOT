@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Editar cliente{% else %}Nuevo cliente{% endif %}{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header">
+        <h1>{% if is_edit %}Editar cliente{% else %}Nuevo cliente{% endif %}</h1>
+    </header>
+
+    <form method="post" class="sgot-form sgot-customer-form">
+        {% csrf_token %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                {% if form.non_field_errors %}
+                <div class="sgot-form-errors" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label for="{{ form.trade_name.id_for_label }}">{{ form.trade_name.label }}</label>
+                        {{ form.trade_name }}
+                        {{ form.trade_name.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.legal_name.id_for_label }}">{{ form.legal_name.label }}</label>
+                        {{ form.legal_name }}
+                        {{ form.legal_name.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.document.id_for_label }}">{{ form.document.label }}</label>
+                        {{ form.document }}
+                        {{ form.document.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.customer_code.id_for_label }}">{{ form.customer_code.label }}</label>
+                        {{ form.customer_code }}
+                        {{ form.customer_code.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.code_system.id_for_label }}">{{ form.code_system.label }}</label>
+                        {{ form.code_system }}
+                        {{ form.code_system.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                        {{ form.phone.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {{ form.email.errors }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="sgot-form-actions">
+            {% if is_edit %}
+            <a href="{% url 'customers:customer_detail' customer.pk %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar cambios</button>
+            {% else %}
+            <a href="{% url 'customers:customer_list' %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar cliente</button>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}

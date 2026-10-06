@@ -34,7 +34,7 @@
             <nav class="sgot-nav" aria-label="Principal">
                 <a class="sgot-nav-item{% if request.resolver_match.url_name == 'dashboard' %} is-active{% endif %}" href="{% url 'workorders:dashboard' %}">Dashboard</a>
                 <a class="sgot-nav-item{% if request.resolver_match.url_name == 'workorder_list' %} is-active{% endif %}" href="{% url 'workorders:workorder_list' %}">Órdenes de trabajo</a>
-                <span class="sgot-nav-item is-disabled">Clientes</span>
+                <a class="sgot-nav-item{% if request.resolver_match.app_name == 'customers' %} is-active{% endif %}" href="{% url 'customers:customer_list' %}">Clientes</a>
                 <span class="sgot-nav-item is-disabled">Almacén</span>
                 <span class="sgot-nav-item is-disabled">Catálogo</span>
             </nav>

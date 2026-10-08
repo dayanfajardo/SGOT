@@ -38,8 +38,10 @@
                 {% if perms.catalog.view_technician %}
                 <a class="sgot-nav-item{% if request.resolver_match.url_name == 'technician_list' %} is-active{% endif %}" href="{% url 'catalog:technician_list' %}">Técnicos</a>
                 {% endif %}
+                {% if perms.catalog.view_product %}
+                <a class="sgot-nav-item{% if request.resolver_match.url_name == 'product_list' %} is-active{% endif %}" href="{% url 'catalog:product_list' %}">Productos</a>
+                {% endif %}
                 <span class="sgot-nav-item is-disabled">Almacén</span>
-                <span class="sgot-nav-item is-disabled">Catálogo</span>
             </nav>
         </aside>
 

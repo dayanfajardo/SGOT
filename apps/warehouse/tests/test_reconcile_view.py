@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.constants import ADMIN_WAREHOUSE_GROUP
-from apps.catalog.models import Product, Technician, WorkType
+from apps.catalog.models import Product, ProductCategory, Technician, WorkType
 from apps.customers.models import Customer
 from apps.warehouse.services import (
     add_output_item,
@@ -44,6 +44,8 @@ class WarehouseOutputReconcileViewTests(TestCase):
         )
         self.product = Product.objects.create(
             name="Sirena exterior",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
             product_type=Product.ProductType.EQUIPMENT,
             unit=Product.Unit.UNIT,
         )

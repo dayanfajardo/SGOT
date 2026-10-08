@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.catalog.models import Product, Technician, WorkType
+from apps.catalog.models import Product, ProductCategory, Technician, WorkType
 from apps.customers.models import Customer
 from apps.warehouse.models import WarehouseOutput, WarehouseOutputItem
 from apps.warehouse.services import (
@@ -182,6 +182,8 @@ class AddOutputItemServiceTests(TestCase):
         )
         self.product = Product.objects.create(
             name="Cámara IP 4MP",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
             product_type=Product.ProductType.EQUIPMENT,
             unit=Product.Unit.UNIT,
         )
@@ -282,6 +284,8 @@ class AddOutputItemServiceTests(TestCase):
     def test_rejects_product_that_does_not_match_work_order_item(self):
         other_product = Product.objects.create(
             name="Cable UTP Cat6",
+            product_code="1-5-1",
+            category=ProductCategory.MATERIALS_ACCESSORIES,
             product_type=Product.ProductType.MATERIAL,
             unit=Product.Unit.METER,
         )
@@ -322,6 +326,8 @@ class UpdateReturnedQuantityServiceTests(TestCase):
         )
         self.product = Product.objects.create(
             name="Sensor PIR",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
             product_type=Product.ProductType.EQUIPMENT,
             unit=Product.Unit.UNIT,
         )
@@ -419,6 +425,8 @@ class ReconcileWarehouseOutputServiceTests(TestCase):
         )
         self.product = Product.objects.create(
             name="Sirena exterior",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
             product_type=Product.ProductType.EQUIPMENT,
             unit=Product.Unit.UNIT,
         )

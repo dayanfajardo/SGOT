@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header sgot-page-header-split">
+        <div>
+            <h1>Productos</h1>
+            <p>Consulta y gestión del catálogo de productos</p>
+        </div>
+        {% if perms.catalog.add_product %}
+        <a href="{% url 'catalog:product_create' %}" class="sgot-btn sgot-btn-primary">Nuevo producto</a>
+        {% endif %}
+    </header>
+
+    <form method="get" class="sgot-form sgot-filters" role="search">
+        {% if filter_form.non_field_errors %}
+        <div class="sgot-form-errors" role="alert">
+            {{ filter_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="sgot-filters-row">
+            <div class="sgot-field sgot-filters-search">
+                {{ filter_form.q }}
+                {{ filter_form.q.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.category }}
+                {{ filter_form.category.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.product_type }}
+                {{ filter_form.product_type.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.active }}
+                {{ filter_form.active.errors }}
+            </div>
+            <div class="sgot-filters-actions">
+                <button type="submit" class="sgot-btn sgot-btn-primary">Filtrar</button>
+                <a href="{% url 'catalog:product_list' %}" class="sgot-btn sgot-btn-quiet">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <section class="sgot-card">
+        {% if products %}
+        <div class="table-responsive">
+            <table class="sgot-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>Referencia / modelo</th>
+                        <th>Categoría</th>
+                        <th>Tipo</th>
+                        <th>Unidad</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{% if product.product_code %}{{ product.product_code }}{% else %}—{% endif %}</td>
+                        <td>
+                            <a href="{% url 'catalog:product_detail' product.pk %}">{{ product.name }}</a>
+                        </td>
+                        <td>{% if product.reference %}{{ product.reference }}{% else %}—{% endif %}</td>
+                        <td>{% if product.category %}{{ product.get_category_display }}{% else %}—{% endif %}</td>
+                        <td>{{ product.get_product_type_display }}</td>
+                        <td>{{ product.get_unit_display }}</td>
+                        <td>
+                            {% if product.active %}
+                            <span class="sgot-badge sgot-badge-active">Activo</span>
+                            {% else %}
+                            <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif has_products %}
+        <div class="sgot-empty-action">
+            <p>No encontramos productos con los filtros seleccionados.</p>
+            <a href="{% url 'catalog:product_list' %}" class="sgot-btn sgot-btn-secondary">Limpiar filtros</a>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay productos registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -56,6 +56,7 @@ GROUP_PERMISSIONS = {
     ],
     TECHNICAL_MANAGER_GROUP: [
         ("customers", "view_customer"),
+        ("catalog", "view_product"),
         ("catalog", "view_technician"),
         ("catalog", "view_worktype"),
         ("workorders", "view_workorder"),

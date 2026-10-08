@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
+                <h1>{{ product.name }}</h1>
+                {% if product.active %}
+                <span class="sgot-badge sgot-badge-active">Activo</span>
+                {% else %}
+                <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                {% endif %}
+            </div>
+            {% if product.product_code %}
+            <p class="sgot-detail-customer">{{ product.product_code }}</p>
+            {% endif %}
+        </div>
+        <div class="sgot-header-actions">
+            {% if perms.catalog.change_product %}
+            <a href="{% url 'catalog:product_update' product.pk %}" class="sgot-btn sgot-btn-primary">Editar producto</a>
+            <form method="post" action="{% url 'catalog:product_toggle_active' product.pk %}" class="sgot-inline-form">
+                {% csrf_token %}
+                {% if product.active %}
+                <button type="submit" class="sgot-btn sgot-btn-danger">Desactivar</button>
+                {% else %}
+                <button type="submit" class="sgot-btn sgot-btn-secondary">Activar</button>
+                {% endif %}
+            </form>
+            {% endif %}
+            <a href="{% url 'catalog:product_list' %}" class="sgot-btn sgot-btn-quiet">Volver a productos</a>
+        </div>
+    </header>
+
+    <div class="sgot-detail">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Código</span>
+                        <p class="sgot-summary-value">{% if product.product_code %}{{ product.product_code }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Producto</span>
+                        <p class="sgot-summary-value">{{ product.name }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Referencia / modelo</span>
+                        <p class="sgot-summary-value">{% if product.reference %}{{ product.reference }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Categoría</span>
+                        <p class="sgot-summary-value">{% if product.category %}{{ product.get_category_display }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Tipo</span>
+                        <p class="sgot-summary-value">{{ product.get_product_type_display }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Unidad</span>
+                        <p class="sgot-summary-value">{{ product.get_unit_display }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Estado</span>
+                        <p class="sgot-summary-value">
+                            {% if product.active %}Activo{% else %}Inactivo{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de creación</span>
+                        <p class="sgot-summary-value">{{ product.created_at }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Última actualización</span>
+                        <p class="sgot-summary-value">{{ product.updated_at }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

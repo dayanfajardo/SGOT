@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Editar producto{% else %}Nuevo producto{% endif %}{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header">
+        <h1>{% if is_edit %}Editar producto{% else %}Nuevo producto{% endif %}</h1>
+    </header>
+
+    <form method="post" class="sgot-form sgot-customer-form">
+        {% csrf_token %}
+
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                {% if form.non_field_errors %}
+                <div class="sgot-form-errors" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="sgot-form-grid">
+                    <div class="sgot-field">
+                        <label for="{{ form.product_code.id_for_label }}">{{ form.product_code.label }}</label>
+                        {{ form.product_code }}
+                        {{ form.product_code.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {{ form.name.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.reference.id_for_label }}">{{ form.reference.label }}</label>
+                        {{ form.reference }}
+                        {{ form.reference.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {{ form.category.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.product_type.id_for_label }}">{{ form.product_type.label }}</label>
+                        {{ form.product_type }}
+                        {{ form.product_type.errors }}
+                    </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
+                        {{ form.unit }}
+                        {{ form.unit.errors }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="sgot-form-actions">
+            {% if is_edit %}
+            <a href="{% url 'catalog:product_detail' product.pk %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar cambios</button>
+            {% else %}
+            <a href="{% url 'catalog:product_list' %}" class="sgot-btn sgot-btn-secondary">Cancelar</a>
+            <button type="submit" class="sgot-btn sgot-btn-primary">Guardar producto</button>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}

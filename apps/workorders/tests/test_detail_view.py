@@ -11,7 +11,7 @@ from apps.accounts.constants import (
     MANAGEMENT_GROUP,
     TECHNICAL_MANAGER_GROUP,
 )
-from apps.catalog.models import Product, WorkType
+from apps.catalog.models import Product, ProductCategory, WorkType
 from apps.customers.models import Customer
 from apps.workorders.models import WorkOrder, WorkOrderHistory, WorkOrderItem
 
@@ -52,6 +52,8 @@ class WorkOrderDetailViewTests(TestCase):
         self.work_type = WorkType.objects.create(name="Instalación CCTV")
         self.product = Product.objects.create(
             name="Cámara IP 4MP",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
             product_type=Product.ProductType.EQUIPMENT,
             unit=Product.Unit.UNIT,
         )

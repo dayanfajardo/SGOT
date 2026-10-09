@@ -145,7 +145,7 @@
             if (emptyOption) {
                 emptyOption.textContent = "";
             }
-            new TomSelect(selectEl, {
+            const tomSelect = new TomSelect(selectEl, {
                 placeholder: placeholder,
                 allowEmptyOption: Boolean(emptyOption),
                 create: false,
@@ -154,6 +154,9 @@
                 dropdownParent: "body",
                 plugins: ["dropdown_input"],
             });
+            if (selectEl.name && selectEl.name.endsWith("-product")) {
+                tomSelect.dropdown.classList.add("ts-dropdown-product");
+            }
         }
 
         const tbody = document.getElementById("item-formset-body");
@@ -368,14 +371,17 @@
         function reindexRows() {
             const rows = tbody.querySelectorAll("tr");
             rows.forEach(function (row, index) {
-                destroyRowSelects(row);
                 row.querySelectorAll("input, select, textarea, label, button").forEach(function (el) {
                     updateElementIndex(el, index);
                 });
-                initRowSelects(row);
             });
             totalFormsInput.value = String(rows.length);
             syncWorkOrderItemOptions();
+        }
+
+        function rowHasPersistedInstance(row) {
+            const idInput = row.querySelector("input[name$='-id']");
+            return Boolean(idInput && idInput.value);
         }
 
         function markExistingRowDeleted(row) {
@@ -437,12 +443,12 @@
             if (!row) {
                 return;
             }
-            if (row.hasAttribute("data-dynamic-row")) {
+            if (rowHasPersistedInstance(row)) {
+                markExistingRowDeleted(row);
+            } else {
                 destroyRowSelects(row);
                 row.remove();
                 reindexRows();
-            } else {
-                markExistingRowDeleted(row);
             }
         });
     })();

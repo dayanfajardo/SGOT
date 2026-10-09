@@ -476,6 +476,13 @@ a.sgot-btn-danger {
     font-weight: 500;
 }
 
+.sgot-page-header-split {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
 .sgot-card {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border-subtle);
@@ -1267,6 +1274,15 @@ a.sgot-btn-danger {
 .ts-dropdown .ts-dropdown-content {
     background: transparent !important;
     background-color: transparent !important;
+}
+
+.ts-dropdown.ts-dropdown-product {
+    min-width: min(36rem, calc(100vw - 24px));
+}
+
+.ts-dropdown.ts-dropdown-product .ts-dropdown-content {
+    max-height: 13.5rem;
+    overflow-y: auto;
 }
 
 .ts-dropdown .dropdown-input-wrap {

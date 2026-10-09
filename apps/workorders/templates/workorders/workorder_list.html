@@ -3,9 +3,14 @@
 {% block title %}Órdenes de trabajo{% endblock %}
 
 {% block content %}
-    <header class="sgot-page-header">
-        <h1>Órdenes de trabajo</h1>
-        <p>Consulta y seguimiento de órdenes registradas</p>
+    <header class="sgot-page-header sgot-page-header-split">
+        <div>
+            <h1>Órdenes de trabajo</h1>
+            <p>Consulta y seguimiento de órdenes registradas</p>
+        </div>
+        {% if perms.workorders.add_workorder %}
+        <a href="{% url 'workorders:workorder_create' %}" class="sgot-btn sgot-btn-primary">Nueva orden</a>
+        {% endif %}
     </header>
 
     <form method="get" class="sgot-form sgot-filters" role="search">

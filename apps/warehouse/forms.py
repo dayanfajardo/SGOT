@@ -7,6 +7,15 @@ from apps.warehouse.models import WarehouseOutput, WarehouseOutputItem
 from apps.workorders.models import WorkOrderItem
 
 
+class ProductChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        label = f"{obj.product_code} · {obj.name}"
+        reference = (obj.reference or "").strip()
+        if reference:
+            return f"{label} · Ref: {reference}"
+        return label
+
+
 class WarehouseOutputCreateForm(forms.ModelForm):
     class Meta:
         model = WarehouseOutput
@@ -26,10 +35,15 @@ class WarehouseOutputCreateForm(forms.ModelForm):
 
 
 class WarehouseOutputItemForm(forms.ModelForm):
-    product = forms.ModelChoiceField(
+    product = ProductChoiceField(
         queryset=Product.objects.none(),
         required=False,
         label="Producto / material adicional",
+    )
+    delivered_quantity = forms.IntegerField(
+        min_value=1,
+        label="Cantidad entregada",
+        widget=forms.NumberInput(attrs={"min": "1", "step": "1"}),
     )
 
     class Meta:

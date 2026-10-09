@@ -147,7 +147,7 @@ class WarehouseOutputCreateViewTests(TestCase):
             items = [
                 {
                     "work_order_item": str(self.work_order_item.pk),
-                    "delivered_quantity": "2.00",
+                    "delivered_quantity": "2",
                 }
             ]
 
@@ -233,7 +233,7 @@ class WarehouseOutputCreateViewTests(TestCase):
                     {
                         "work_order_item": str(self.work_order_item.pk),
                         "product": "",
-                        "delivered_quantity": "2.00",
+                        "delivered_quantity": "2",
                     }
                 ]
             ),
@@ -253,7 +253,7 @@ class WarehouseOutputCreateViewTests(TestCase):
                     {
                         "work_order_item": "",
                         "product": str(self.extra_product.pk),
-                        "delivered_quantity": "5.00",
+                        "delivered_quantity": "5",
                     }
                 ]
             ),
@@ -272,11 +272,11 @@ class WarehouseOutputCreateViewTests(TestCase):
                 items=[
                     {
                         "work_order_item": str(self.work_order_item.pk),
-                        "delivered_quantity": "2.00",
+                        "delivered_quantity": "2",
                     },
                     {
                         "product": str(self.extra_product.pk),
-                        "delivered_quantity": "5.00",
+                        "delivered_quantity": "5",
                     },
                 ]
             ),
@@ -298,11 +298,11 @@ class WarehouseOutputCreateViewTests(TestCase):
                 items=[
                     {
                         "work_order_item": str(self.work_order_item.pk),
-                        "delivered_quantity": "1.00",
+                        "delivered_quantity": "1",
                     },
                     {
                         "work_order_item": str(self.work_order_item.pk),
-                        "delivered_quantity": "1.00",
+                        "delivered_quantity": "1",
                     },
                 ]
             ),
@@ -320,7 +320,7 @@ class WarehouseOutputCreateViewTests(TestCase):
                     {
                         "work_order_item": "",
                         "product": "",
-                        "delivered_quantity": "2.00",
+                        "delivered_quantity": "2",
                     }
                 ]
             ),
@@ -338,7 +338,7 @@ class WarehouseOutputCreateViewTests(TestCase):
                     {
                         "work_order_item": str(self.work_order_item.pk),
                         "product": str(self.extra_product.pk),
-                        "delivered_quantity": "2.00",
+                        "delivered_quantity": "2",
                     }
                 ]
             ),
@@ -357,7 +357,7 @@ class WarehouseOutputCreateViewTests(TestCase):
             items=[
                 {
                     "product": str(self.extra_product.pk),
-                    "delivered_quantity": "1.00",
+                    "delivered_quantity": "1",
                 }
             ]
         )
@@ -380,7 +380,7 @@ class WarehouseOutputCreateViewTests(TestCase):
             items=[
                 {
                     "product": str(self.extra_product.pk),
-                    "delivered_quantity": "1.00",
+                    "delivered_quantity": "1",
                 }
             ]
         )
@@ -417,7 +417,7 @@ class WarehouseOutputCreateViewTests(TestCase):
                     {
                         "work_order_item": str(self.work_order_item.pk),
                         "product": str(self.extra_product.pk),
-                        "delivered_quantity": "2.00",
+                        "delivered_quantity": "2",
                     }
                 ]
             ),

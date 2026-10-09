@@ -1,6 +1,29 @@
 from django import forms
 
-from apps.catalog.models import Product, ProductCategory, Technician
+from apps.catalog.models import Product, ProductCategory, Technician, WorkType
+
+
+class WorkTypeFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar tipo de trabajo...",
+                "aria-label": "Buscar tipo de trabajo",
+            },
+        ),
+    )
+    active = forms.ChoiceField(
+        required=False,
+        label="",
+        choices=[
+            ("", "Todos"),
+            ("1", "Activos"),
+            ("0", "Inactivos"),
+        ],
+        widget=forms.Select(attrs={"aria-label": "Estado"}),
+    )
 
 
 class TechnicianFilterForm(forms.Form):
@@ -30,6 +53,23 @@ class TechnicianFilterForm(forms.Form):
         ],
         widget=forms.Select(attrs={"aria-label": "Estado"}),
     )
+
+
+class WorkTypeForm(forms.ModelForm):
+    class Meta:
+        model = WorkType
+        fields = (
+            "name",
+            "description",
+        )
+        labels = {
+            "name": "Nombre",
+            "description": "Descripción",
+        }
+        widgets = {
+            "name": forms.TextInput(),
+            "description": forms.TextInput(),
+        }
 
 
 class TechnicianForm(forms.ModelForm):

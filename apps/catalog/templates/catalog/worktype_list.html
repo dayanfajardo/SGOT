@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Tipos de trabajo{% endblock %}
+
+{% block content %}
+    <header class="sgot-page-header sgot-page-header-split">
+        <div>
+            <h1>Tipos de trabajo</h1>
+            <p>Consulta y gestión de los tipos de trabajo</p>
+        </div>
+        {% if perms.catalog.add_worktype %}
+        <a href="{% url 'catalog:worktype_create' %}" class="sgot-btn sgot-btn-primary">Nuevo tipo de trabajo</a>
+        {% endif %}
+    </header>
+
+    <form method="get" class="sgot-form sgot-filters" role="search">
+        {% if filter_form.non_field_errors %}
+        <div class="sgot-form-errors" role="alert">
+            {{ filter_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="sgot-filters-row">
+            <div class="sgot-field sgot-filters-search">
+                {{ filter_form.q }}
+                {{ filter_form.q.errors }}
+            </div>
+            <div class="sgot-field">
+                {{ filter_form.active }}
+                {{ filter_form.active.errors }}
+            </div>
+            <div class="sgot-filters-actions">
+                <button type="submit" class="sgot-btn sgot-btn-primary">Filtrar</button>
+                <a href="{% url 'catalog:worktype_list' %}" class="sgot-btn sgot-btn-quiet">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <section class="sgot-card">
+        {% if worktypes %}
+        <div class="table-responsive">
+            <table class="sgot-table">
+                <thead>
+                    <tr>
+                        <th>Tipo de trabajo</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for worktype in worktypes %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'catalog:worktype_detail' worktype.pk %}">{{ worktype.name }}</a>
+                        </td>
+                        <td>{% if worktype.description %}{{ worktype.description }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if worktype.active %}
+                            <span class="sgot-badge sgot-badge-active">Activo</span>
+                            {% else %}
+                            <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif has_worktypes %}
+        <div class="sgot-empty-action">
+            <p>No encontramos tipos de trabajo con los filtros seleccionados.</p>
+            <a href="{% url 'catalog:worktype_list' %}" class="sgot-btn sgot-btn-secondary">Limpiar filtros</a>
+        </div>
+        {% else %}
+        <p class="sgot-empty">No hay tipos de trabajo registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

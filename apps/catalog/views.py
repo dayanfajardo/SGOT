@@ -9,8 +9,105 @@ from apps.catalog.forms import (
     ProductForm,
     TechnicianFilterForm,
     TechnicianForm,
+    WorkTypeFilterForm,
+    WorkTypeForm,
 )
-from apps.catalog.models import Product, Technician
+from apps.catalog.models import Product, Technician, WorkType
+
+
+@login_required
+def worktype_list(request):
+    if not request.user.has_perm("catalog.view_worktype"):
+        raise PermissionDenied
+
+    worktypes = WorkType.objects.all()
+    has_worktypes = worktypes.exists()
+    filter_form = WorkTypeFilterForm(request.GET or None)
+
+    if filter_form.is_valid():
+        q = filter_form.cleaned_data.get("q")
+        if q:
+            worktypes = worktypes.filter(
+                Q(name__icontains=q) | Q(description__icontains=q)
+            )
+
+        active = filter_form.cleaned_data.get("active")
+        if active == "1":
+            worktypes = worktypes.filter(active=True)
+        elif active == "0":
+            worktypes = worktypes.filter(active=False)
+
+    return render(
+        request,
+        "catalog/worktype_list.html",
+        {
+            "worktypes": worktypes,
+            "filter_form": filter_form,
+            "has_worktypes": has_worktypes,
+        },
+    )
+
+
+@login_required
+def worktype_detail(request, pk):
+    if not request.user.has_perm("catalog.view_worktype"):
+        raise PermissionDenied
+
+    worktype = get_object_or_404(WorkType, pk=pk)
+    return render(
+        request,
+        "catalog/worktype_detail.html",
+        {"worktype": worktype},
+    )
+
+
+def _worktype_form(request, *, worktype=None):
+    if request.method == "POST":
+        form = WorkTypeForm(request.POST, instance=worktype)
+        if form.is_valid():
+            worktype = form.save()
+            return redirect("catalog:worktype_detail", pk=worktype.pk)
+    else:
+        form = WorkTypeForm(instance=worktype)
+
+    return render(
+        request,
+        "catalog/worktype_form.html",
+        {
+            "form": form,
+            "worktype": worktype,
+            "is_edit": worktype is not None,
+        },
+    )
+
+
+@login_required
+def worktype_create(request):
+    if not request.user.has_perm("catalog.add_worktype"):
+        raise PermissionDenied
+
+    return _worktype_form(request)
+
+
+@login_required
+def worktype_update(request, pk):
+    if not request.user.has_perm("catalog.change_worktype"):
+        raise PermissionDenied
+
+    worktype = get_object_or_404(WorkType, pk=pk)
+    return _worktype_form(request, worktype=worktype)
+
+
+@login_required
+@require_POST
+def worktype_toggle_active(request, pk):
+    if not request.user.has_perm("catalog.change_worktype"):
+        raise PermissionDenied
+
+    worktype = get_object_or_404(WorkType, pk=pk)
+    worktype.active = not worktype.active
+    worktype.save(update_fields=["active"])
+    return redirect("catalog:worktype_detail", pk=worktype.pk)
 
 
 @login_required

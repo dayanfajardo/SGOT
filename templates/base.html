@@ -41,6 +41,9 @@
                 {% if perms.catalog.view_product %}
                 <a class="sgot-nav-item{% if request.resolver_match.url_name == 'product_list' %} is-active{% endif %}" href="{% url 'catalog:product_list' %}">Productos</a>
                 {% endif %}
+                {% if perms.catalog.view_worktype %}
+                <a class="sgot-nav-item{% if request.resolver_match.url_name == 'worktype_list' %} is-active{% endif %}" href="{% url 'catalog:worktype_list' %}">Tipos de trabajo</a>
+                {% endif %}
                 <span class="sgot-nav-item is-disabled">Almacén</span>
             </nav>
         </aside>

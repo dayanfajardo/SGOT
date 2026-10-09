@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ worktype.name }}{% endblock %}
+
+{% block content %}
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
+                <h1>{{ worktype.name }}</h1>
+                {% if worktype.active %}
+                <span class="sgot-badge sgot-badge-active">Activo</span>
+                {% else %}
+                <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="sgot-header-actions">
+            {% if perms.catalog.change_worktype %}
+            <a href="{% url 'catalog:worktype_update' worktype.pk %}" class="sgot-btn sgot-btn-primary">Editar</a>
+            <form method="post" action="{% url 'catalog:worktype_toggle_active' worktype.pk %}" class="sgot-inline-form">
+                {% csrf_token %}
+                {% if worktype.active %}
+                <button type="submit" class="sgot-btn sgot-btn-danger">Desactivar</button>
+                {% else %}
+                <button type="submit" class="sgot-btn sgot-btn-secondary">Activar</button>
+                {% endif %}
+            </form>
+            {% endif %}
+            <a href="{% url 'catalog:worktype_list' %}" class="sgot-btn sgot-btn-quiet">Volver a tipos de trabajo</a>
+        </div>
+    </header>
+
+    <div class="sgot-detail">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Nombre</span>
+                        <p class="sgot-summary-value">{{ worktype.name }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Descripción</span>
+                        <p class="sgot-summary-value">{% if worktype.description %}{{ worktype.description }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Estado</span>
+                        <p class="sgot-summary-value">
+                            {% if worktype.active %}Activo{% else %}Inactivo{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de creación</span>
+                        <p class="sgot-summary-value">{{ worktype.created_at }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Última actualización</span>
+                        <p class="sgot-summary-value">{{ worktype.updated_at }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

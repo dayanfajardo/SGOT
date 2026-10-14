@@ -21,22 +21,36 @@ It does NOT replace:
 
 ## Main roles
 
-- Administrador / Almacén
+- Administrador
+- Almacén
 - Comercial
 - Jefe Técnica
 - Gerencia
+
+The historical group "Administrador / Almacén" may still exist in data.
+Do not delete it or auto-migrate its users.
 
 Technicians do not log into SGOT in V1.
 
 ## Responsibilities
 
-### Administrador / Almacén
+### Administrador
 - Registers work orders received physically.
 - Selects the commercial advisor associated with the work order.
 - Manages customers, products, technicians and work types.
 - Creates warehouse outputs.
 - Registers delivered and returned materials.
 - Handles operational workflow.
+- Manages users (view, add, change). Must not delete users.
+
+### Almacén
+- Registers work orders received physically.
+- Selects the commercial advisor associated with the work order.
+- Manages customers, products, technicians and work types.
+- Creates warehouse outputs.
+- Registers delivered and returned materials.
+- Handles operational workflow.
+- Must not manage users.
 
 ### Comercial
 - Does NOT create work orders in SGOT.

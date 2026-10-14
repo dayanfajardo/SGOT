@@ -6,7 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.constants import (
-    ADMIN_WAREHOUSE_GROUP,
+    WAREHOUSE_GROUP,
     COMMERCIAL_GROUP,
     MANAGEMENT_GROUP,
     TECHNICAL_MANAGER_GROUP,
@@ -41,7 +41,7 @@ class WorkOrderStartInstallationViewTests(TestCase):
         )
 
         self.admin_group, _ = Group.objects.get_or_create(
-            name=ADMIN_WAREHOUSE_GROUP
+            name=WAREHOUSE_GROUP
         )
         self.commercial_group, _ = Group.objects.get_or_create(
             name=COMMERCIAL_GROUP

@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.constants import (
-    ADMIN_WAREHOUSE_GROUP,
+    WAREHOUSE_GROUP,
     COMMERCIAL_GROUP,
     MANAGEMENT_GROUP,
     TECHNICAL_MANAGER_GROUP,
@@ -31,7 +32,7 @@ class WorkOrderCreateViewTests(TestCase):
         )
 
         self.admin_group, _ = Group.objects.get_or_create(
-            name=ADMIN_WAREHOUSE_GROUP
+            name=WAREHOUSE_GROUP
         )
         self.commercial_group, _ = Group.objects.get_or_create(
             name=COMMERCIAL_GROUP
@@ -231,6 +232,14 @@ class WorkOrderCreateViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(WorkOrder.objects.count(), 0)
         self.assertEqual(WorkOrderItem.objects.count(), 0)
+
+    def test_commercial_cannot_open_create_form(self):
+        call_command("setup_roles")
+        self.client.force_login(self.commercial)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_commercial_cannot_create_work_order(self):
         response = self._post_create(self.commercial)

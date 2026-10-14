@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, Permission
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.accounts.constants import COMMERCIAL_GROUP
+from apps.accounts.constants import COMMERCIAL_GROUP, WAREHOUSE_GROUP
 from apps.catalog.models import Technician, WorkType
 from apps.customers.models import Customer
 from apps.workorders.forms import WorkOrderFilterForm
@@ -26,7 +26,7 @@ class WorkOrderListViewTests(TestCase):
 
         self.commercial_group, _ = Group.objects.get_or_create(name="Comercial")
         self.admin_group, _ = Group.objects.get_or_create(
-            name="Administrador / Almacén"
+            name=WAREHOUSE_GROUP
         )
         self.technical_group, _ = Group.objects.get_or_create(name="Jefe Técnica")
         self.management_group, _ = Group.objects.get_or_create(name="Gerencia")
@@ -178,7 +178,7 @@ class WorkOrderListFilterTests(TestCase):
         )
         self.commercial_group, _ = Group.objects.get_or_create(name=COMMERCIAL_GROUP)
         self.admin_group, _ = Group.objects.get_or_create(
-            name="Administrador / Almacén"
+            name=WAREHOUSE_GROUP
         )
         self.commercial_group.permissions.add(view_permission)
         self.admin_group.permissions.add(view_permission)

@@ -2,11 +2,12 @@ from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 
 from apps.accounts.constants import (
-    ADMIN_WAREHOUSE_GROUP,
+    ADMIN_GROUP,
     COMMERCIAL_GROUP,
     DEFAULT_GROUPS,
     MANAGEMENT_GROUP,
     TECHNICAL_MANAGER_GROUP,
+    WAREHOUSE_GROUP,
 )
 
 
@@ -17,42 +18,52 @@ def _get_permission(app_label, codename):
     )
 
 
+OPERATIONAL_PERMISSIONS = [
+    ("customers", "view_customer"),
+    ("customers", "add_customer"),
+    ("customers", "change_customer"),
+    ("catalog", "view_product"),
+    ("catalog", "add_product"),
+    ("catalog", "change_product"),
+    ("catalog", "view_technician"),
+    ("catalog", "add_technician"),
+    ("catalog", "change_technician"),
+    ("catalog", "view_worktype"),
+    ("catalog", "add_worktype"),
+    ("catalog", "change_worktype"),
+    ("workorders", "view_workorder"),
+    ("workorders", "add_workorder"),
+    ("workorders", "change_workorder"),
+    ("workorders", "view_workorderitem"),
+    ("workorders", "add_workorderitem"),
+    ("workorders", "change_workorderitem"),
+    ("workorders", "view_workorderhistory"),
+    ("warehouse", "view_warehouseoutput"),
+    ("warehouse", "add_warehouseoutput"),
+    ("warehouse", "change_warehouseoutput"),
+    ("warehouse", "view_warehouseoutputitem"),
+    ("warehouse", "add_warehouseoutputitem"),
+    ("warehouse", "change_warehouseoutputitem"),
+]
+
+ADMIN_USER_PERMISSIONS = [
+    ("accounts", "view_user"),
+    ("accounts", "add_user"),
+    ("accounts", "change_user"),
+]
+
 GROUP_PERMISSIONS = {
-    ADMIN_WAREHOUSE_GROUP: [
-        ("customers", "view_customer"),
-        ("customers", "add_customer"),
-        ("customers", "change_customer"),
-        ("catalog", "view_product"),
-        ("catalog", "add_product"),
-        ("catalog", "change_product"),
-        ("catalog", "view_technician"),
-        ("catalog", "add_technician"),
-        ("catalog", "change_technician"),
-        ("catalog", "view_worktype"),
-        ("catalog", "add_worktype"),
-        ("catalog", "change_worktype"),
-        ("workorders", "view_workorder"),
-        ("workorders", "add_workorder"),
-        ("workorders", "change_workorder"),
-        ("workorders", "view_workorderitem"),
-        ("workorders", "add_workorderitem"),
-        ("workorders", "change_workorderitem"),
-        ("workorders", "view_workorderhistory"),
-        ("warehouse", "view_warehouseoutput"),
-        ("warehouse", "add_warehouseoutput"),
-        ("warehouse", "change_warehouseoutput"),
-        ("warehouse", "view_warehouseoutputitem"),
-        ("warehouse", "add_warehouseoutputitem"),
-        ("warehouse", "change_warehouseoutputitem"),
+    ADMIN_GROUP: [
+        *OPERATIONAL_PERMISSIONS,
+        *ADMIN_USER_PERMISSIONS,
     ],
+    WAREHOUSE_GROUP: list(OPERATIONAL_PERMISSIONS),
     COMMERCIAL_GROUP: [
         ("customers", "view_customer"),
         ("catalog", "view_product"),
         ("catalog", "view_worktype"),
         ("workorders", "view_workorder"),
-        ("workorders", "add_workorder"),
         ("workorders", "view_workorderitem"),
-        ("workorders", "add_workorderitem"),
     ],
     TECHNICAL_MANAGER_GROUP: [
         ("customers", "view_customer"),

@@ -2,11 +2,12 @@ from datetime import date
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.constants import (
-    ADMIN_WAREHOUSE_GROUP,
+    WAREHOUSE_GROUP,
     COMMERCIAL_GROUP,
     MANAGEMENT_GROUP,
     TECHNICAL_MANAGER_GROUP,
@@ -31,7 +32,7 @@ class WorkOrderListViewTests(TestCase):
 
         self.commercial_group, _ = Group.objects.get_or_create(name=COMMERCIAL_GROUP)
         self.admin_group, _ = Group.objects.get_or_create(
-            name=ADMIN_WAREHOUSE_GROUP
+            name=WAREHOUSE_GROUP
         )
         self.technical_group, _ = Group.objects.get_or_create(
             name=TECHNICAL_MANAGER_GROUP
@@ -167,6 +168,16 @@ class WorkOrderListViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_order.number)
         self.assertNotIn(self.other_order, self._orders(response))
+
+    def test_commercial_does_not_see_new_order_button(self):
+        call_command("setup_roles")
+        response = self._get_list(self.commercial)
+
+        self.assertNotContains(response, "Nueva orden")
+        self.assertNotContains(
+            response,
+            reverse("workorders:workorder_create"),
+        )
 
     def test_admin_warehouse_sees_all_orders(self):
         response = self._get_list(self.admin_user)

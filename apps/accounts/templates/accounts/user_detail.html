@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{% if managed_user.get_full_name %}{{ managed_user.get_full_name }}{% else %}{{ managed_user.username }}{% endif %}{% endblock %}
+
+{% block content %}
+    <header class="sgot-detail-header">
+        <div class="sgot-detail-header-main">
+            <div class="sgot-detail-title-row">
+                <h1>{% if managed_user.get_full_name %}{{ managed_user.get_full_name }}{% else %}{{ managed_user.username }}{% endif %}</h1>
+                {% if managed_user.is_active %}
+                <span class="sgot-badge sgot-badge-active">Activo</span>
+                {% else %}
+                <span class="sgot-badge sgot-badge-inactive">Inactivo</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="sgot-header-actions">
+            {% if perms.accounts.change_user %}
+            <a href="{% url 'accounts:user_update' managed_user.pk %}" class="sgot-btn sgot-btn-primary">Editar</a>
+            {% if managed_user.is_active %}
+            {% if managed_user.pk != request.user.pk %}
+            <form method="post" action="{% url 'accounts:user_toggle_active' managed_user.pk %}" class="sgot-inline-form">
+                {% csrf_token %}
+                <button type="submit" class="sgot-btn sgot-btn-danger">Desactivar usuario</button>
+            </form>
+            {% endif %}
+            {% else %}
+            <form method="post" action="{% url 'accounts:user_toggle_active' managed_user.pk %}" class="sgot-inline-form">
+                {% csrf_token %}
+                <button type="submit" class="sgot-btn sgot-btn-secondary">Activar usuario</button>
+            </form>
+            {% endif %}
+            {% endif %}
+            {% if perms.accounts.change_user %}
+            <a href="{% url 'accounts:user_reset_password' managed_user.pk %}" class="sgot-btn sgot-btn-secondary">Restablecer contraseña</a>
+            {% endif %}
+            <a href="{% url 'accounts:user_list' %}" class="sgot-btn sgot-btn-quiet">Volver a Usuarios</a>
+        </div>
+    </header>
+
+    <div class="sgot-detail">
+        <section class="sgot-card">
+            <header class="sgot-card-header">
+                <h2>Información general</h2>
+            </header>
+            <div class="sgot-card-body">
+                <div class="sgot-summary-grid">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Username</span>
+                        <p class="sgot-summary-value">{{ managed_user.username }}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Nombre</span>
+                        <p class="sgot-summary-value">{% if managed_user.first_name %}{{ managed_user.first_name }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Apellido</span>
+                        <p class="sgot-summary-value">{% if managed_user.last_name %}{{ managed_user.last_name }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Correo</span>
+                        <p class="sgot-summary-value">{% if managed_user.email %}{{ managed_user.email }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Rol</span>
+                        <p class="sgot-summary-value">
+                            {% for group in managed_user.groups.all %}
+                            {{ group.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            —
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Estado</span>
+                        <p class="sgot-summary-value">
+                            {% if managed_user.is_active %}Activo{% else %}Inactivo{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="sgot-summary-secondary">
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Último acceso</span>
+                        <p class="sgot-summary-value">{% if managed_user.last_login %}{{ managed_user.last_login }}{% else %}—{% endif %}</p>
+                    </div>
+                    <div class="sgot-summary-item">
+                        <span class="sgot-summary-label">Fecha de creación de cuenta</span>
+                        <p class="sgot-summary-value">{{ managed_user.date_joined }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

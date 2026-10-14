@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group, Permission
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.accounts.constants import ADMIN_WAREHOUSE_GROUP
+from apps.accounts.constants import WAREHOUSE_GROUP
 from apps.catalog.models import Product, ProductCategory, Technician, WorkType
 from apps.customers.models import Customer
 from apps.warehouse.services import (
@@ -31,7 +31,7 @@ class WarehouseOutputReconcileViewTests(TestCase):
             codename="view_workorder",
         )
         self.admin_group, _ = Group.objects.get_or_create(
-            name=ADMIN_WAREHOUSE_GROUP
+            name=WAREHOUSE_GROUP
         )
         self.admin_group.permissions.add(change_permission, view_permission)
 

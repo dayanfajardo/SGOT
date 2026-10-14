@@ -785,6 +785,7 @@ a.sgot-btn-danger {
 .sgot-form input[type="number"],
 .sgot-form input[type="date"],
 .sgot-form input[type="email"],
+.sgot-form input[type="password"],
 .sgot-form select,
 .sgot-form textarea {
     width: 100%;
@@ -1944,5 +1945,77 @@ a.sgot-btn-danger {
     .sgot-dashboard-date {
         margin: 0;
     }
+}
+
+.sgot-login-page {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+    background: var(--bg-app);
+}
+
+.sgot-login-toolbar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.sgot-login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 28px;
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.sgot-login-brand {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.sgot-login-card h1 {
+    margin: 8px 0 24px;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+.sgot-login-card .sgot-form {
+    gap: 16px;
+}
+
+.sgot-login-card .sgot-form-errors {
+    margin-bottom: 0;
+}
+
+.sgot-login-card .sgot-form-actions {
+    margin-top: 4px;
+}
+
+.sgot-login-card .sgot-form-actions .sgot-btn {
+    width: 100%;
+}
+
+.sgot-help ul {
+    margin: 6px 0 0;
+    padding-left: 1.15rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.sgot-help ul:first-child {
+    margin-top: 0;
 }
 

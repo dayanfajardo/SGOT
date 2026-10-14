@@ -376,6 +376,7 @@ class WorkOrderServiceTests(TestCase):
             technician=self.technician,
             scheduled_date=date(2026, 9, 25),
         )
+        self._create_warehouse_output(work_order)
 
         start_installation(
             work_order=work_order,
@@ -395,6 +396,7 @@ class WorkOrderServiceTests(TestCase):
             technician=self.technician,
             scheduled_date=date(2026, 9, 25),
         )
+        self._create_warehouse_output(work_order)
 
         start_installation(
             work_order=work_order,
@@ -411,6 +413,7 @@ class WorkOrderServiceTests(TestCase):
             technician=self.technician,
             scheduled_date=date(2026, 9, 25),
         )
+        self._create_warehouse_output(work_order)
 
         start_installation(
             work_order=work_order,
@@ -457,6 +460,45 @@ class WorkOrderServiceTests(TestCase):
                 work_order=without_date,
                 actor=self.user,
             )
+
+    def test_cannot_start_installation_without_warehouse_output(self):
+        work_order = self._create_work_order(
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            technician=self.technician,
+            scheduled_date=date(2026, 9, 25),
+        )
+
+        with self.assertRaises(ValidationError) as context:
+            start_installation(
+                work_order=work_order,
+                actor=self.user,
+            )
+
+        self.assertIn(
+            "No se puede iniciar la instalación sin una salida de almacén registrada.",
+            context.exception.messages,
+        )
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.status, WorkOrder.Status.EQUIPMENT_OK)
+        self.assertIsNone(work_order.installation_started_at)
+
+    def test_start_installation_with_warehouse_output(self):
+        work_order = self._create_work_order(
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            technician=self.technician,
+            scheduled_date=date(2026, 9, 25),
+        )
+        self._create_warehouse_output(work_order)
+
+        start_installation(
+            work_order=work_order,
+            actor=self.user,
+        )
+
+        work_order.refresh_from_db()
+
+        self.assertEqual(work_order.status, WorkOrder.Status.IN_INSTALLATION)
+        self.assertIsNotNone(work_order.installation_started_at)
 
     # complete_work_order
 

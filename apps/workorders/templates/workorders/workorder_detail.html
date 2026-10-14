@@ -74,7 +74,7 @@
             </div>
         </section>
 
-        {% if schedule_form or status_form or can_start_installation or start_installation_error or can_complete_work_order or complete_work_order_error %}
+        {% if schedule_form or status_form or can_start_installation or start_installation_error or can_complete_work_order or complete_work_order_error or show_create_warehouse_output_primary %}
         <section class="sgot-card">
             <header class="sgot-card-header">
                 <h2>Acciones</h2>
@@ -95,8 +95,11 @@
                 </div>
                 {% endif %}
 
-                {% if can_start_installation or can_complete_work_order %}
+                {% if can_start_installation or can_complete_work_order or show_create_warehouse_output_primary %}
                 <div class="sgot-action-panel sgot-action-panel-primary">
+                    {% if show_create_warehouse_output_primary %}
+                    <a href="{% url 'warehouse:warehouse_output_create' work_order.pk %}" class="sgot-btn sgot-btn-primary">Crear salida de almacén</a>
+                    {% endif %}
                     {% if can_start_installation %}
                     <form method="post" action="{% url 'workorders:workorder_start_installation' work_order.pk %}" class="sgot-inline-form">
                         {% csrf_token %}
@@ -202,7 +205,7 @@
                     {% if can_reconcile_warehouse_output %}
                     <form method="post" action="{% url 'warehouse:warehouse_output_reconcile' warehouse_output.pk %}" class="sgot-inline-form">
                         {% csrf_token %}
-                        <button type="submit" class="sgot-btn sgot-btn-primary">Conciliar salida</button>
+                        <button type="submit" class="sgot-btn sgot-btn-secondary">Conciliar salida</button>
                     </form>
                     {% endif %}
                 </div>
@@ -301,12 +304,7 @@
             <p class="sgot-empty">No hay ítems registrados en esta salida.</p>
             {% endif %}
             {% else %}
-            <div class="sgot-empty-action">
-                <p>Esta orden aún no tiene una salida de almacén.</p>
-                {% if can_create_warehouse_output %}
-                <a href="{% url 'warehouse:warehouse_output_create' work_order.pk %}" class="sgot-btn sgot-btn-primary">Crear salida de almacén</a>
-                {% endif %}
-            </div>
+            <p class="sgot-empty">Esta orden aún no tiene una salida de almacén.</p>
             {% endif %}
         </section>
 

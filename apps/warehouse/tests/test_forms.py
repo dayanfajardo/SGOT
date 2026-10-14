@@ -6,7 +6,8 @@ from django.test import TestCase
 
 from apps.catalog.models import Product, ProductCategory, Technician, WorkType
 from apps.customers.models import Customer
-from apps.warehouse.forms import WarehouseOutputItemForm
+from apps.warehouse.forms import WarehouseOutputItemForm, WarehouseReturnItemForm
+from apps.warehouse.models import WarehouseOutput, WarehouseOutputItem
 from apps.workorders.models import WorkOrder
 
 User = get_user_model()
@@ -137,3 +138,85 @@ class WarehouseOutputItemFormTests(TestCase):
         self.assertIn("1-1-1 · Cámara IP 4MP", rendered)
         self.assertNotIn(self.inactive_product.name, rendered)
         self.assertNotIn("OLD-99", rendered)
+
+
+class WarehouseReturnItemFormTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="almacen.devoluciones.form")
+        self.customer = Customer.objects.create(trade_name="Cliente Devolución")
+        self.work_type = WorkType.objects.create(name="Instalación CCTV")
+        self.technician = Technician.objects.create(
+            first_name="Carlos",
+            last_name="Pérez",
+            technician_type=Technician.TechnicianType.STAFF,
+        )
+        self.product = Product.objects.create(
+            name="Cámara IP 4MP",
+            product_code="1-1-1",
+            category=ProductCategory.CCTV,
+            product_type=Product.ProductType.EQUIPMENT,
+            unit=Product.Unit.UNIT,
+        )
+        self.work_order = WorkOrder.objects.create(
+            number="9301",
+            customer=self.customer,
+            commercial=self.user,
+            work_type=self.work_type,
+            status=WorkOrder.Status.IN_INSTALLATION,
+            assigned_technician=self.technician,
+            received_date=date(2026, 9, 12),
+            created_by=self.user,
+        )
+        self.output = WarehouseOutput.objects.create(
+            number="5601",
+            work_order=self.work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.user,
+        )
+        self.item = WarehouseOutputItem.objects.create(
+            warehouse_output=self.output,
+            product=self.product,
+            delivered_quantity=Decimal("4"),
+        )
+
+    def _form(self, returned_quantity):
+        return WarehouseReturnItemForm(
+            data={
+                "item_id": str(self.item.pk),
+                "returned_quantity": returned_quantity,
+            },
+            warehouse_output=self.output,
+        )
+
+    def test_returned_quantity_zero_is_valid(self):
+        form = self._form("0")
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["returned_quantity"], 0)
+
+    def test_returned_quantity_one_is_valid(self):
+        form = self._form("1")
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["returned_quantity"], 1)
+
+    def test_returned_quantity_larger_integers_are_valid(self):
+        form = self._form("4")
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["returned_quantity"], 4)
+
+    def test_returned_quantity_decimal_is_invalid(self):
+        form = self._form("1.5")
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("returned_quantity", form.errors)
+
+    def test_returned_quantity_widget_uses_integer_step(self):
+        form = WarehouseReturnItemForm(warehouse_output=self.output)
+        rendered = str(form["returned_quantity"])
+
+        self.assertIn('min="0"', rendered)
+        self.assertIn('step="1"', rendered)
+

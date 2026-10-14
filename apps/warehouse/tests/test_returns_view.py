@@ -85,9 +85,11 @@ class WarehouseOutputReturnsViewTests(TestCase):
             product=self.extra_product,
             delivered_quantity=Decimal("10.00"),
         )
+        self.work_order.status = WorkOrder.Status.IN_INSTALLATION
+        self.work_order.save(update_fields=["status"])
         update_returned_quantity(
             output_item=self.item_one,
-            returned_quantity=Decimal("1.50"),
+            returned_quantity=Decimal("1"),
         )
 
         self.url = reverse(
@@ -141,11 +143,11 @@ class WarehouseOutputReturnsViewTests(TestCase):
             [
                 {
                     "item_id": self.item_one.pk,
-                    "returned_quantity": "2.00",
+                    "returned_quantity": "2",
                 },
                 {
                     "item_id": self.item_two.pk,
-                    "returned_quantity": "3.00",
+                    "returned_quantity": "3",
                 },
             ]
         )
@@ -202,7 +204,7 @@ class WarehouseOutputReturnsViewTests(TestCase):
 
         self.assertEqual(
             formset.forms[0].initial["returned_quantity"],
-            Decimal("1.50"),
+            Decimal("1"),
         )
         self.assertEqual(
             formset.forms[1].initial["returned_quantity"],
@@ -218,6 +220,75 @@ class WarehouseOutputReturnsViewTests(TestCase):
         self.assertEqual(self.item_one.returned_quantity, Decimal("2.00"))
         self.assertEqual(self.item_two.returned_quantity, Decimal("3.00"))
 
+    def test_zero_returned_quantity_is_valid(self):
+        response = self._post_returns(
+            self.admin_user,
+            self._formset_data(
+                [
+                    {
+                        "item_id": self.item_one.pk,
+                        "returned_quantity": "0",
+                    },
+                    {
+                        "item_id": self.item_two.pk,
+                        "returned_quantity": "0",
+                    },
+                ]
+            ),
+        )
+
+        self.assertRedirects(response, self.detail_url)
+        self.item_one.refresh_from_db()
+        self.item_two.refresh_from_db()
+        self.assertEqual(self.item_one.returned_quantity, Decimal("0"))
+        self.assertEqual(self.item_two.returned_quantity, Decimal("0"))
+
+    def test_one_returned_quantity_is_valid(self):
+        response = self._post_returns(
+            self.admin_user,
+            self._formset_data(
+                [
+                    {
+                        "item_id": self.item_one.pk,
+                        "returned_quantity": "1",
+                    },
+                    {
+                        "item_id": self.item_two.pk,
+                        "returned_quantity": "1",
+                    },
+                ]
+            ),
+        )
+
+        self.assertRedirects(response, self.detail_url)
+        self.item_one.refresh_from_db()
+        self.item_two.refresh_from_db()
+        self.assertEqual(self.item_one.returned_quantity, Decimal("1"))
+        self.assertEqual(self.item_two.returned_quantity, Decimal("1"))
+
+    def test_decimal_returned_quantity_is_invalid(self):
+        response = self._post_returns(
+            self.admin_user,
+            self._formset_data(
+                [
+                    {
+                        "item_id": self.item_one.pk,
+                        "returned_quantity": "1.5",
+                    },
+                    {
+                        "item_id": self.item_two.pk,
+                        "returned_quantity": "0",
+                    },
+                ]
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.item_one.refresh_from_db()
+        self.item_two.refresh_from_db()
+        self.assertEqual(self.item_one.returned_quantity, Decimal("1"))
+        self.assertEqual(self.item_two.returned_quantity, Decimal("0.00"))
+
     @patch("apps.warehouse.views.update_returned_quantity")
     def test_post_does_not_update_quantities_outside_service(self, mock_update):
         mock_update.return_value = self.item_one
@@ -227,7 +298,7 @@ class WarehouseOutputReturnsViewTests(TestCase):
         self.assertTrue(mock_update.called)
         self.item_one.refresh_from_db()
         self.item_two.refresh_from_db()
-        self.assertEqual(self.item_one.returned_quantity, Decimal("1.50"))
+        self.assertEqual(self.item_one.returned_quantity, Decimal("1"))
         self.assertEqual(self.item_two.returned_quantity, Decimal("0.00"))
 
     def test_quantity_over_delivered_does_not_save_partial_changes(self):
@@ -237,11 +308,11 @@ class WarehouseOutputReturnsViewTests(TestCase):
                 [
                     {
                         "item_id": self.item_one.pk,
-                        "returned_quantity": "2.00",
+                        "returned_quantity": "2",
                     },
                     {
                         "item_id": self.item_two.pk,
-                        "returned_quantity": "99.00",
+                        "returned_quantity": "99",
                     },
                 ]
             ),
@@ -250,7 +321,7 @@ class WarehouseOutputReturnsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.item_one.refresh_from_db()
         self.item_two.refresh_from_db()
-        self.assertEqual(self.item_one.returned_quantity, Decimal("1.50"))
+        self.assertEqual(self.item_one.returned_quantity, Decimal("1"))
         self.assertEqual(self.item_two.returned_quantity, Decimal("0.00"))
 
     def test_tampered_item_id_from_another_output_does_not_change_items(self):
@@ -274,11 +345,11 @@ class WarehouseOutputReturnsViewTests(TestCase):
                 [
                     {
                         "item_id": self.item_one.pk,
-                        "returned_quantity": "2.00",
+                        "returned_quantity": "2",
                     },
                     {
                         "item_id": other_item.pk,
-                        "returned_quantity": "1.00",
+                        "returned_quantity": "1",
                     },
                 ]
             ),
@@ -288,7 +359,7 @@ class WarehouseOutputReturnsViewTests(TestCase):
         self.item_one.refresh_from_db()
         self.item_two.refresh_from_db()
         other_item.refresh_from_db()
-        self.assertEqual(self.item_one.returned_quantity, Decimal("1.50"))
+        self.assertEqual(self.item_one.returned_quantity, Decimal("1"))
         self.assertEqual(self.item_two.returned_quantity, Decimal("0.00"))
         self.assertEqual(other_item.returned_quantity, Decimal("0.00"))
 
@@ -301,3 +372,61 @@ class WarehouseOutputReturnsViewTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 403)
+
+    def test_cannot_open_returns_before_installation_starts(self):
+        work_order = self._create_work_order(number="9403")
+        output = create_warehouse_output(
+            number="5503",
+            work_order=work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.admin_user,
+        )
+        item = add_output_item(
+            warehouse_output=output,
+            product=self.product,
+            delivered_quantity=Decimal("4.00"),
+        )
+        url = reverse("warehouse:warehouse_output_returns", args=[output.pk])
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            reverse("workorders:workorder_detail", args=[work_order.pk]),
+        )
+        item.refresh_from_db()
+        self.assertEqual(item.returned_quantity, Decimal("0.00"))
+
+    def test_cannot_post_returns_before_installation_starts(self):
+        work_order = self._create_work_order(number="9404")
+        output = create_warehouse_output(
+            number="5504",
+            work_order=work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.admin_user,
+        )
+        item = add_output_item(
+            warehouse_output=output,
+            product=self.product,
+            delivered_quantity=Decimal("4.00"),
+        )
+        data = self._formset_data(
+            [
+                {
+                    "item_id": item.pk,
+                    "returned_quantity": "2.00",
+                }
+            ]
+        )
+
+        response = self._post_returns(self.admin_user, data, output=output)
+
+        self.assertRedirects(
+            response,
+            reverse("workorders:workorder_detail", args=[work_order.pk]),
+        )
+        item.refresh_from_db()
+        self.assertEqual(item.returned_quantity, Decimal("0.00"))

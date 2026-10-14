@@ -90,6 +90,12 @@ def add_output_item(
 
 @transaction.atomic
 def update_returned_quantity(*, output_item, returned_quantity):
+    work_order = output_item.warehouse_output.work_order
+    if work_order.status != WorkOrder.Status.IN_INSTALLATION:
+        raise ValidationError(
+            "Las devoluciones solo pueden registrarse cuando la orden está en instalación."
+        )
+
     if output_item.warehouse_output.reconciled_at is not None:
         raise ValidationError(
             "No se pueden modificar devoluciones de una salida ya conciliada."

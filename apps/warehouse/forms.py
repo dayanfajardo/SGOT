@@ -131,11 +131,10 @@ WarehouseOutputItemFormSet = inlineformset_factory(
 
 class WarehouseReturnItemForm(forms.Form):
     item_id = forms.IntegerField(widget=forms.HiddenInput)
-    returned_quantity = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
+    returned_quantity = forms.IntegerField(
         min_value=0,
         label="Cantidad devuelta",
+        widget=forms.NumberInput(attrs={"min": "0", "step": "1"}),
     )
 
     def __init__(self, *args, warehouse_output, **kwargs):

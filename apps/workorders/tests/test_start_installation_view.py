@@ -13,6 +13,7 @@ from apps.accounts.constants import (
 )
 from apps.catalog.models import Technician, WorkType
 from apps.customers.models import Customer
+from apps.warehouse.models import WarehouseOutput
 from apps.workorders.models import WorkOrder, WorkOrderHistory
 
 User = get_user_model()
@@ -30,6 +31,14 @@ class WorkOrderStartInstallationViewTests(TestCase):
             content_type__app_label="workorders",
             codename="view_workorder",
         )
+        add_output_permission = Permission.objects.get(
+            content_type__app_label="warehouse",
+            codename="add_warehouseoutput",
+        )
+        change_output_permission = Permission.objects.get(
+            content_type__app_label="warehouse",
+            codename="change_warehouseoutput",
+        )
 
         self.admin_group, _ = Group.objects.get_or_create(
             name=ADMIN_WAREHOUSE_GROUP
@@ -44,7 +53,12 @@ class WorkOrderStartInstallationViewTests(TestCase):
             name=MANAGEMENT_GROUP
         )
 
-        self.admin_group.permissions.add(change_permission, view_permission)
+        self.admin_group.permissions.add(
+            change_permission,
+            view_permission,
+            add_output_permission,
+            change_output_permission,
+        )
         for group in (
             self.commercial_group,
             self.technical_group,
@@ -77,6 +91,7 @@ class WorkOrderStartInstallationViewTests(TestCase):
         )
 
         self.work_order = self._create_ready_work_order(number="OT-4001")
+        self._create_warehouse_output(self.work_order)
         self.url = reverse(
             "workorders:workorder_start_installation",
             args=[self.work_order.pk],
@@ -109,6 +124,22 @@ class WorkOrderStartInstallationViewTests(TestCase):
         }
         data.update(overrides)
         return WorkOrder.objects.create(**data)
+
+    def _create_warehouse_output(self, work_order, *, number="5400"):
+        return WarehouseOutput.objects.create(
+            number=number,
+            work_order=work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 22),
+            created_by=self.admin_user,
+        )
+
+    def _get_detail(self, user, work_order=None):
+        work_order = work_order or self.work_order
+        self.client.force_login(user)
+        return self.client.get(
+            reverse("workorders:workorder_detail", args=[work_order.pk])
+        )
 
     def _post_start(self, user, work_order=None):
         work_order = work_order or self.work_order
@@ -194,6 +225,46 @@ class WorkOrderStartInstallationViewTests(TestCase):
 
         self.assertEqual(work_order.status, WorkOrder.Status.EQUIPMENT_OK)
         self.assertIsNone(work_order.installation_started_at)
+
+    def test_order_without_warehouse_output_does_not_start(self):
+        work_order = self._create_ready_work_order(number="OT-4006")
+
+        response = self._post_start(self.admin_user, work_order)
+        work_order.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(work_order.status, WorkOrder.Status.EQUIPMENT_OK)
+        self.assertIsNone(work_order.installation_started_at)
+        self.assertContains(
+            response,
+            "No se puede iniciar la instalación sin una salida de almacén registrada.",
+        )
+
+    def test_start_button_is_hidden_without_warehouse_output(self):
+        work_order = self._create_ready_work_order(number="OT-4007")
+
+        response = self._get_detail(self.admin_user, work_order)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Iniciar instalación")
+        self.assertContains(response, "Crear salida de almacén")
+
+    def test_start_button_is_shown_when_warehouse_output_exists(self):
+        response = self._get_detail(self.admin_user)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Iniciar instalación")
+        self.assertNotContains(response, "Crear salida de almacén")
+        self.assertNotContains(response, "Registrar devoluciones")
+
+    def test_returns_button_is_shown_after_installation_starts(self):
+        self._post_start(self.admin_user)
+
+        response = self._get_detail(self.admin_user)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Registrar devoluciones")
+        self.assertNotContains(response, "Iniciar instalación")
 
     def test_validation_error_rerenders_detail_with_message(self):
         work_order = self._create_ready_work_order(

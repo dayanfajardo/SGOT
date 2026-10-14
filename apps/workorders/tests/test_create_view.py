@@ -153,8 +153,11 @@ class WorkOrderCreateViewTests(TestCase):
     def test_valid_post_creates_work_order(self):
         response = self._post_create(self.admin_user)
 
-        self.assertRedirects(response, reverse("workorders:workorder_list"))
-        self.assertTrue(WorkOrder.objects.filter(number="OT-2001").exists())
+        work_order = WorkOrder.objects.get(number="OT-2001")
+        self.assertRedirects(
+            response,
+            reverse("workorders:workorder_detail", args=[work_order.pk]),
+        )
 
     def test_created_work_order_status_is_received(self):
         self._post_create(self.admin_user)

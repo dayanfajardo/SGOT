@@ -104,6 +104,16 @@ def warehouse_output_returns(request, pk):
             "No se pueden modificar devoluciones de una salida ya conciliada."
         )
 
+    if warehouse_output.work_order.status != WorkOrder.Status.IN_INSTALLATION:
+        messages.error(
+            request,
+            "Las devoluciones solo pueden registrarse cuando la orden está en instalación.",
+        )
+        return redirect(
+            "workorders:workorder_detail",
+            pk=warehouse_output.work_order_id,
+        )
+
     if request.method == "POST":
         formset = WarehouseReturnFormSet(
             request.POST,

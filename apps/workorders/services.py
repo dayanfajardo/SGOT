@@ -179,6 +179,11 @@ def start_installation(*, work_order, actor):
             "La orden debe tener técnico asignado y fecha programada."
         )
 
+    if not WarehouseOutput.objects.filter(work_order=work_order).exists():
+        raise ValidationError(
+            "No se puede iniciar la instalación sin una salida de almacén registrada."
+        )
+
     previous_status = work_order.status
     work_order.status = WorkOrder.Status.IN_INSTALLATION
     work_order.installation_started_at = timezone.now()

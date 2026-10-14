@@ -364,7 +364,10 @@ def work_order_create(request):
                 )
                 formset.instance = work_order
                 formset.save()
-            return redirect("workorders:workorder_list")
+            return redirect(
+                "workorders:workorder_detail",
+                pk=work_order.pk,
+            )
     else:
         form = WorkOrderCreateForm()
         formset = WorkOrderItemFormSet()
@@ -421,18 +424,19 @@ def _ensure_detail_action_forms(request, work_order, context):
             if status_form.fields["new_status"].choices:
                 context["status_form"] = status_form
 
+    if "warehouse_output" not in context:
+        context["warehouse_output"] = getattr(work_order, "warehouse_output", None)
+
+    warehouse_output = context["warehouse_output"]
+
     if "can_start_installation" not in context:
         context["can_start_installation"] = (
             request.user.has_perm("workorders.change_workorder")
             and work_order.status == WorkOrder.Status.EQUIPMENT_OK
             and work_order.assigned_technician_id
             and work_order.scheduled_date
+            and warehouse_output is not None
         )
-
-    if "warehouse_output" not in context:
-        context["warehouse_output"] = getattr(work_order, "warehouse_output", None)
-
-    warehouse_output = context["warehouse_output"]
 
     if "can_create_warehouse_output" not in context:
         context["can_create_warehouse_output"] = (
@@ -442,10 +446,17 @@ def _ensure_detail_action_forms(request, work_order, context):
             and warehouse_output is None
         )
 
+    if "show_create_warehouse_output_primary" not in context:
+        context["show_create_warehouse_output_primary"] = (
+            context["can_create_warehouse_output"]
+            and work_order.scheduled_date is not None
+        )
+
     if "can_register_returns" not in context:
         context["can_register_returns"] = (
             warehouse_output is not None
             and warehouse_output.reconciled_at is None
+            and work_order.status == WorkOrder.Status.IN_INSTALLATION
             and request.user.has_perm("warehouse.change_warehouseoutput")
         )
 

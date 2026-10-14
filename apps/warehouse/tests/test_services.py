@@ -343,6 +343,8 @@ class UpdateReturnedQuantityServiceTests(TestCase):
             product=self.product,
             delivered_quantity=Decimal("4.00"),
         )
+        self.work_order.status = WorkOrder.Status.IN_INSTALLATION
+        self.work_order.save(update_fields=["status"])
 
     def test_update_valid_returned_quantity(self):
         update_returned_quantity(
@@ -402,6 +404,43 @@ class UpdateReturnedQuantityServiceTests(TestCase):
         self.item.refresh_from_db()
         self.assertEqual(self.item.returned_quantity, Decimal("1.50"))
 
+    def test_rejects_update_when_work_order_is_not_in_installation(self):
+        work_order = WorkOrder.objects.create(
+            number="9203",
+            customer=self.customer,
+            commercial=self.user,
+            work_type=self.work_type,
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            assigned_technician=self.technician,
+            received_date=date(2026, 9, 14),
+            created_by=self.user,
+        )
+        output = create_warehouse_output(
+            number="5301",
+            work_order=work_order,
+            technician=self.technician,
+            output_date=date(2026, 9, 20),
+            created_by=self.user,
+        )
+        item = add_output_item(
+            warehouse_output=output,
+            product=self.product,
+            delivered_quantity=Decimal("4.00"),
+        )
+
+        with self.assertRaises(ValidationError) as context:
+            update_returned_quantity(
+                output_item=item,
+                returned_quantity=Decimal("1.00"),
+            )
+
+        self.assertIn(
+            "Las devoluciones solo pueden registrarse cuando la orden está en instalación.",
+            context.exception.messages,
+        )
+        item.refresh_from_db()
+        self.assertEqual(item.returned_quantity, Decimal("0"))
+
 
 class ReconcileWarehouseOutputServiceTests(TestCase):
     def setUp(self):
@@ -442,12 +481,12 @@ class ReconcileWarehouseOutputServiceTests(TestCase):
             product=self.product,
             delivered_quantity=Decimal("4.00"),
         )
+        self.work_order.status = WorkOrder.Status.IN_INSTALLATION
+        self.work_order.save()
         update_returned_quantity(
             output_item=self.item,
             returned_quantity=Decimal("1.50"),
         )
-        self.work_order.status = WorkOrder.Status.IN_INSTALLATION
-        self.work_order.save()
 
     def test_reconciles_output_for_in_installation_order(self):
         result = reconcile_warehouse_output(

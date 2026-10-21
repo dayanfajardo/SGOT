@@ -1493,16 +1493,54 @@ class UserResetPasswordViewTests(TestCase):
 class LoginViewTests(TestCase):
     def setUp(self):
         self.url = reverse("accounts:login")
+        self.dashboard_url = reverse("workorders:dashboard")
+        call_command("setup_roles")
+        self.password = "SgotClave123"
         self.user = User.objects.create_user(
             username="operador",
             email="operador@example.com",
-            password="SgotClave123",
+            password=self.password,
         )
+        self.user.groups.add(Group.objects.get(name=WAREHOUSE_GROUP))
         self.inactive_user = User.objects.create_user(
             username="usuario.bloqueado",
             email="bloqueado@example.com",
-            password="SgotClave123",
+            password=self.password,
             is_active=False,
+        )
+        self.role_users = {
+            ADMIN_GROUP: self._create_role_user("admin.login", ADMIN_GROUP),
+            WAREHOUSE_GROUP: self.user,
+            COMMERCIAL_GROUP: self._create_role_user(
+                "comercial.login",
+                COMMERCIAL_GROUP,
+            ),
+            TECHNICAL_MANAGER_GROUP: self._create_role_user(
+                "tecnica.login",
+                TECHNICAL_MANAGER_GROUP,
+            ),
+            MANAGEMENT_GROUP: self._create_role_user(
+                "gerencia.login",
+                MANAGEMENT_GROUP,
+            ),
+        }
+
+    def _create_role_user(self, username, group_name):
+        user = User.objects.create_user(
+            username=username,
+            email=f"{username}@example.com",
+            password=self.password,
+        )
+        user.groups.add(Group.objects.get(name=group_name))
+        return user
+
+    def _post_login(self, username, *, next_url=None):
+        url = self.url
+        if next_url is not None:
+            url = f"{self.url}?next={next_url}"
+        return self.client.post(
+            url,
+            {"username": username, "password": self.password},
         )
 
     def test_login_uses_expected_template(self):
@@ -1524,10 +1562,53 @@ class LoginViewTests(TestCase):
         self.assertContains(response, "clave correctos")
         self.assertNotContains(response, "Please enter")
 
+    def test_valid_login_without_next_redirects_to_dashboard(self):
+        response = self._post_login(self.user.username)
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_administrator_login_redirects_to_dashboard(self):
+        response = self._post_login(self.role_users[ADMIN_GROUP].username)
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_warehouse_login_redirects_to_dashboard(self):
+        response = self._post_login(self.role_users[WAREHOUSE_GROUP].username)
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_commercial_login_redirects_to_dashboard(self):
+        response = self._post_login(self.role_users[COMMERCIAL_GROUP].username)
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_technical_manager_login_redirects_to_dashboard(self):
+        response = self._post_login(
+            self.role_users[TECHNICAL_MANAGER_GROUP].username
+        )
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_management_login_redirects_to_dashboard(self):
+        response = self._post_login(
+            self.role_users[MANAGEMENT_GROUP].username
+        )
+
+        self.assertRedirects(response, self.dashboard_url)
+
+    def test_login_with_valid_next_is_respected(self):
+        next_url = reverse("accounts:user_list")
+        response = self._post_login(
+            self.role_users[ADMIN_GROUP].username,
+            next_url=next_url,
+        )
+
+        self.assertRedirects(response, next_url)
+
     def test_inactive_user_login_is_rejected_without_revealing_status(self):
         response = self.client.post(
             self.url,
-            {"username": "usuario.bloqueado", "password": "SgotClave123"},
+            {"username": "usuario.bloqueado", "password": self.password},
         )
 
         self.assertEqual(response.status_code, 200)
@@ -1536,3 +1617,11 @@ class LoginViewTests(TestCase):
         content = response.content.decode()
         self.assertNotIn("inactiv", content.lower())
         self.assertNotIn("desactivad", content.lower())
+
+    def test_root_redirects_to_dashboard_and_does_not_render_old_home(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/", follow=True)
+
+        self.assertEqual(response.redirect_chain, [(self.dashboard_url, 302)])
+        self.assertTemplateUsed(response, "workorders/dashboard.html")
+        self.assertTemplateNotUsed(response, "accounts/home.html")

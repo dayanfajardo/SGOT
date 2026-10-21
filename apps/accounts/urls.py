@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 
 from apps.accounts import views
 
@@ -53,7 +53,9 @@ urlpatterns = [
     ),
     path(
         "",
-        login_required(TemplateView.as_view(template_name="accounts/home.html")),
+        login_required(
+            RedirectView.as_view(pattern_name="workorders:dashboard")
+        ),
         name="home",
     ),
 ]

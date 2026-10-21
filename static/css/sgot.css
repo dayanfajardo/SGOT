@@ -1947,20 +1947,55 @@ a.sgot-btn-danger {
     }
 }
 
+/* Split login: form column follows the active theme; the brand panel stays dark. */
 .sgot-login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--bg-app);
+}
+
+.sgot-login-main {
     position: relative;
     display: flex;
+    flex: 1;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 24px 16px;
-    background: var(--bg-app);
+    padding: 72px 20px 32px;
 }
 
 .sgot-login-toolbar {
     position: absolute;
     top: 16px;
     right: 16px;
+}
+
+.sgot-login-mobile-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: #16171d;
+}
+
+.sgot-login-mobile-brand img {
+    width: 120px;
+    height: auto;
+}
+
+.sgot-login-mobile-brand span {
+    color: #f4f4f5;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 .sgot-login-card {
@@ -1973,17 +2008,24 @@ a.sgot-btn-danger {
     box-shadow: var(--shadow-sm);
 }
 
-.sgot-login-brand {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 0.9375rem;
+.sgot-login-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-control);
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.0625rem;
     font-weight: 650;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    letter-spacing: -0.03em;
+    line-height: 1;
 }
 
 .sgot-login-card h1 {
-    margin: 8px 0 24px;
+    margin: 0 0 24px;
     color: var(--text-primary);
     font-size: 1.5rem;
     font-weight: 650;
@@ -1999,12 +2041,126 @@ a.sgot-btn-danger {
     margin-bottom: 0;
 }
 
+.sgot-login-card .sgot-form-errors .errorlist,
+.sgot-login-card .sgot-field .errorlist {
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sgot-login-card .sgot-form-errors .errorlist {
+    margin: 0;
+}
+
 .sgot-login-card .sgot-form-actions {
     margin-top: 4px;
 }
 
 .sgot-login-card .sgot-form-actions .sgot-btn {
     width: 100%;
+}
+
+.sgot-login-visual {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .sgot-login-page {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .sgot-login-main {
+        flex: 1 1 50%;
+        min-height: 100vh;
+    }
+
+    .sgot-login-toolbar {
+        right: auto;
+        left: 16px;
+    }
+
+    .sgot-login-mobile-brand {
+        display: none;
+    }
+
+    .sgot-login-visual {
+        --login-panel-bg: #121318;
+        --login-panel-text: #f4f4f5;
+        --login-panel-muted: #a1a1aa;
+        --login-panel-line: rgba(255, 255, 255, 0.1);
+        --login-glow-accent: rgba(108, 92, 231, 0.45);
+        --login-glow-info: rgba(34, 211, 238, 0.2);
+
+        position: relative;
+        display: flex;
+        flex: 1 1 50%;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 48px 40px;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 78% 52% at 18% 12%, var(--login-glow-accent), transparent 62%),
+            radial-gradient(ellipse 58% 48% at 86% 86%, var(--login-glow-info), transparent 64%),
+            var(--login-panel-bg);
+        color: var(--login-panel-text);
+    }
+
+    .sgot-login-visual::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 22px 22px;
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 20%, transparent 75%);
+        pointer-events: none;
+    }
+
+    .sgot-login-visual-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: min(420px, 100%);
+        text-align: center;
+    }
+
+    .sgot-login-visual-stage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 220px;
+        padding: 28px 24px;
+        border: 1px solid var(--login-panel-line);
+        border-radius: 16px;
+        background: color-mix(in srgb, #ffffff 5%, transparent);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .sgot-login-logo {
+        width: min(280px, 100%);
+        height: auto;
+    }
+
+    .sgot-login-wordmark {
+        margin: 28px 0 0;
+        color: var(--login-panel-text);
+        font-size: 2rem;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+    }
+
+    .sgot-login-caption {
+        margin: 8px 0 0;
+        color: var(--login-panel-muted);
+        font-size: 0.9375rem;
+        font-weight: 450;
+        line-height: 1.4;
+    }
 }
 
 .sgot-help ul {

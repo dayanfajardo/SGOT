@@ -29,52 +29,69 @@
 </head>
 <body>
     <div class="sgot-login-page">
-        <div class="sgot-login-toolbar">
-            <button type="button" class="sgot-theme-toggle" id="sgot-theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
-                <svg class="sgot-theme-icon sgot-theme-icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M13.2 10.1A5.6 5.6 0 0 1 5.9 2.8 4.4 4.4 0 1 0 13.2 10.1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                </svg>
-                <svg class="sgot-theme-icon sgot-theme-icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M8 2v1.2M8 12.8V14M2 8h1.2M12.8 8H14M3.7 3.7l.9.9M11.4 11.4l.9.9M3.7 12.3l.9-.9M11.4 4.6l.9-.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-            </button>
-        </div>
+        <section class="sgot-login-main">
+            <div class="sgot-login-toolbar">
+                <button type="button" class="sgot-theme-toggle" id="sgot-theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+                    <svg class="sgot-theme-icon sgot-theme-icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M13.2 10.1A5.6 5.6 0 0 1 5.9 2.8 4.4 4.4 0 1 0 13.2 10.1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    <svg class="sgot-theme-icon sgot-theme-icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 2v1.2M8 12.8V14M2 8h1.2M12.8 8H14M3.7 3.7l.9.9M11.4 11.4l.9.9M3.7 12.3l.9-.9M11.4 4.6l.9-.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
 
-        <section class="sgot-login-card">
-            <p class="sgot-login-brand">SGOT</p>
-            <h1>Iniciar sesión</h1>
+            <div class="sgot-login-mobile-brand">
+                <img src="{% static 'img/logo-centinela.png' %}" alt="Centinela de Occidente Ltda." width="578" height="432">
+                <span>SGOT</span>
+            </div>
 
-            <form method="post" class="sgot-form">
-                {% csrf_token %}
+            <section class="sgot-login-card">
+                <div class="sgot-login-mark" aria-hidden="true">S</div>
+                <h1>Iniciar sesión</h1>
 
-                {% if form.non_field_errors %}
-                <div class="sgot-form-errors" role="alert">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
+                <form method="post" class="sgot-form">
+                    {% csrf_token %}
 
-                <div class="sgot-field">
-                    <label for="{{ form.username.id_for_label }}">Usuario</label>
-                    {{ form.username }}
-                    {{ form.username.errors }}
-                </div>
+                    {% if form.non_field_errors %}
+                    <div class="sgot-form-errors" role="alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
 
-                <div class="sgot-field">
-                    <label for="{{ form.password.id_for_label }}">Contraseña</label>
-                    {{ form.password }}
-                    {{ form.password.errors }}
-                </div>
+                    <div class="sgot-field">
+                        <label for="{{ form.username.id_for_label }}">Usuario</label>
+                        {{ form.username }}
+                        {{ form.username.errors }}
+                    </div>
 
-                {% if next %}
-                <input type="hidden" name="next" value="{{ next }}">
-                {% endif %}
+                    <div class="sgot-field">
+                        <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                        {{ form.password }}
+                        {{ form.password.errors }}
+                    </div>
 
-                <div class="sgot-form-actions">
-                    <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar sesión</button>
-                </div>
-            </form>
+                    {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
+
+                    <div class="sgot-form-actions">
+                        <button type="submit" class="sgot-btn sgot-btn-primary">Iniciar sesión</button>
+                    </div>
+                </form>
+            </section>
         </section>
+
+        <aside class="sgot-login-visual" aria-label="SGOT">
+            <div class="sgot-login-visual-inner">
+                <div class="sgot-login-visual-stage">
+                    <img class="sgot-login-logo" src="{% static 'img/logo-centinela.png' %}" alt="Centinela de Occidente Ltda." width="578" height="432">
+                </div>
+                <p class="sgot-login-wordmark">SGOT</p>
+                <p class="sgot-login-caption">Gestión de órdenes de trabajo</p>
+            </div>
+        </aside>
     </div>
     <script src="{% static 'js/theme.js' %}"></script>
 </body>

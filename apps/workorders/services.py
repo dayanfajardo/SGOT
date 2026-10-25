@@ -116,7 +116,7 @@ def schedule_work_order(
 ):
     if work_order.status != WorkOrder.Status.EQUIPMENT_OK:
         raise ValidationError(
-            "Solo se puede programar una orden en estado Equipos OK."
+            "Solo se puede programar una orden en estado Equipos completos para instalación."
         )
 
     if technician is None:
@@ -193,7 +193,7 @@ def schedule_work_order(
 def start_installation(*, work_order, actor):
     if work_order.status != WorkOrder.Status.EQUIPMENT_OK:
         raise ValidationError(
-            "Solo se puede iniciar la instalación si la orden está en Equipos OK."
+            "Solo se puede iniciar la instalación si la orden está en Equipos completos para instalación."
         )
 
     if not work_order.assigned_technician or not work_order.scheduled_date:

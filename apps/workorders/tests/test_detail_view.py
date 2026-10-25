@@ -220,10 +220,10 @@ class WorkOrderDetailViewTests(TestCase):
         response = self._get_detail(self.admin_user)
 
         self.assertContains(response, "Recibida")
-        self.assertContains(response, "Equipos OK")
+        self.assertContains(response, "Equipos completos para instalación")
         self.assertContains(
             response,
-            "Estado cambiado de Recibida a Equipos OK.",
+            "Estado cambiado de Recibida a Equipos completos para instalación.",
         )
         self.assertNotContains(response, "RECEIVED")
         self.assertNotContains(response, "EQUIPMENT_OK")

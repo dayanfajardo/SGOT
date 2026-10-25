@@ -278,7 +278,7 @@ class WorkOrderStartInstallationViewTests(TestCase):
         self.assertTemplateUsed(response, "workorders/workorder_detail.html")
         self.assertContains(
             response,
-            "Solo se puede iniciar la instalación si la orden está en Equipos OK.",
+            "Solo se puede iniciar la instalación si la orden está en Equipos completos para instalación.",
         )
 
     def test_commercial_cannot_start_installation(self):

@@ -27,13 +27,7 @@ from apps.workorders.services import (
 )
 
 
-_STATUS_LABELS = {
-    WorkOrder.Status.RECEIVED: "Recibida",
-    WorkOrder.Status.PENDING_EQUIPMENT: "Pendiente de equipos",
-    WorkOrder.Status.EQUIPMENT_OK: "Equipos OK",
-    WorkOrder.Status.IN_INSTALLATION: "En instalación",
-    WorkOrder.Status.COMPLETED: "Completada",
-}
+_STATUS_LABELS = dict(WorkOrder.Status.choices)
 _MONTHS_ES = {
     1: "ene",
     2: "feb",

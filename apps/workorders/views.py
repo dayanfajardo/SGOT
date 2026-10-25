@@ -144,6 +144,20 @@ def _sanitize_description(text):
     return re.sub(r"\s+", " ", presented).strip()
 
 
+def _extract_reschedule_reason(description):
+    if not description:
+        return ""
+    marker = "Motivo:"
+    text = str(description)
+    index = text.rfind(marker)
+    if index == -1:
+        return ""
+    reason = text[index + len(marker):].strip()
+    if reason.endswith("."):
+        reason = reason[:-1].rstrip()
+    return reason
+
+
 def _present_history_description(entry):
     event_type = entry.event_type
     previous = _present_history_value(entry.previous_value)
@@ -171,17 +185,24 @@ def _present_history_description(entry):
         new_date_label = _present_history_value(new_date)
         prev_technician_label = _present_history_value(prev_technician)
         new_technician_label = _present_history_value(new_technician)
+        reason = _extract_reschedule_reason(entry.description)
         if prev_date_label == "—" and new_date_label != "—":
             if new_technician_label != "—":
-                return (
+                description = (
                     f"Orden programada para el {new_date_label}. "
                     f"Técnico: {new_technician_label}."
                 )
-            return f"Orden programada para el {new_date_label}."
+            else:
+                description = f"Orden programada para el {new_date_label}."
+            if reason:
+                description += f" Motivo: {reason}."
+            return description
         if new_date_label != "—":
             description = (
                 f"Orden reprogramada del {prev_date_label} al {new_date_label}."
             )
+            if reason:
+                description += f" Motivo: {reason}."
             if (
                 prev_technician_label != "—"
                 or new_technician_label != "—"
@@ -504,6 +525,7 @@ def work_order_schedule(request, pk):
                 technician=form.cleaned_data["technician"],
                 scheduled_date=form.cleaned_data["scheduled_date"],
                 actor=request.user,
+                reschedule_reason=form.cleaned_data.get("reschedule_reason") or None,
             )
         except ValidationError as exc:
             form.add_error(None, exc)

@@ -134,6 +134,14 @@
                         {{ schedule_form.scheduled_date }}
                         {{ schedule_form.scheduled_date.errors }}
                     </div>
+                    {% if work_order.scheduled_date %}
+                    <div class="sgot-field">
+                        <label for="{{ schedule_form.reschedule_reason.id_for_label }}">{{ schedule_form.reschedule_reason.label }}</label>
+                        {{ schedule_form.reschedule_reason }}
+                        {{ schedule_form.reschedule_reason.errors }}
+                        <p class="sgot-help">{{ schedule_form.reschedule_reason.help_text }}</p>
+                    </div>
+                    {% endif %}
                     <div class="sgot-form-actions">
                         <button type="submit" class="sgot-btn sgot-btn-secondary">Guardar programación</button>
                     </div>

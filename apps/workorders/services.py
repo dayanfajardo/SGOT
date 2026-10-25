@@ -6,6 +6,10 @@ from apps.warehouse.models import WarehouseOutput
 
 from .models import WorkOrder, WorkOrderHistory
 
+RESCHEDULE_REASON_REQUIRED_MESSAGE = (
+    "Debe indicar el motivo de la reprogramación."
+)
+
 ALLOWED_STATUS_TRANSITIONS = {
     WorkOrder.Status.RECEIVED: {
         WorkOrder.Status.PENDING_EQUIPMENT,
@@ -97,8 +101,19 @@ def change_status(*, work_order, new_status, actor):
     return work_order
 
 
+def _normalize_reschedule_reason(reschedule_reason):
+    return (reschedule_reason or "").strip()
+
+
 @transaction.atomic
-def schedule_work_order(*, work_order, technician, scheduled_date, actor):
+def schedule_work_order(
+    *,
+    work_order,
+    technician,
+    scheduled_date,
+    actor,
+    reschedule_reason=None,
+):
     if work_order.status != WorkOrder.Status.EQUIPMENT_OK:
         raise ValidationError(
             "Solo se puede programar una orden en estado Equipos OK."
@@ -117,9 +132,13 @@ def schedule_work_order(*, work_order, technician, scheduled_date, actor):
     current_date = work_order.scheduled_date
     same_technician = work_order.assigned_technician_id == technician.pk
     same_date = current_date == scheduled_date
+    reason = _normalize_reschedule_reason(reschedule_reason)
 
     if same_technician and same_date:
         raise ValidationError("No hay cambios en la programación de la orden.")
+
+    if current_date is not None and not same_date and not reason:
+        raise ValidationError(RESCHEDULE_REASON_REQUIRED_MESSAGE)
 
     is_first_schedule = current_date is None and current_technician is None
 
@@ -141,14 +160,17 @@ def schedule_work_order(*, work_order, technician, scheduled_date, actor):
         )
     elif not same_date:
         previous_technician = current_technician or "Sin técnico"
+        description = (
+            f"Orden reprogramada del {current_date} al {scheduled_date}. "
+            f"Técnico: {previous_technician} -> {technician}."
+        )
+        if reason:
+            description += f" Motivo: {reason}."
         _create_history(
             work_order=work_order,
             actor=actor,
             event_type=WorkOrderHistory.EventType.RESCHEDULED,
-            description=(
-                f"Orden reprogramada del {current_date} al {scheduled_date}. "
-                f"Técnico: {previous_technician} -> {technician}."
-            ),
+            description=description,
             previous_value=f"{current_date} | {previous_technician}",
             new_value=f"{scheduled_date} | {technician}",
         )

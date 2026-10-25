@@ -6,7 +6,10 @@ from apps.accounts.constants import COMMERCIAL_GROUP
 from apps.catalog.models import Product, Technician
 
 from .models import WorkOrder, WorkOrderItem
-from .services import ALLOWED_STATUS_TRANSITIONS
+from .services import (
+    ALLOWED_STATUS_TRANSITIONS,
+    RESCHEDULE_REASON_REQUIRED_MESSAGE,
+)
 
 User = get_user_model()
 
@@ -83,8 +86,20 @@ class WorkOrderScheduleForm(forms.Form):
         label="Fecha programada",
         widget=forms.DateInput(attrs={"type": "date"}),
     )
+    reschedule_reason = forms.CharField(
+        required=False,
+        label="Motivo de reprogramación",
+        help_text="Obligatorio si cambia la fecha actualmente programada.",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "class": "sgot-textarea-compact",
+            },
+        ),
+    )
 
     def __init__(self, *args, work_order=None, **kwargs):
+        self.work_order = work_order
         if work_order is not None:
             initial = kwargs.setdefault("initial", {})
             if work_order.assigned_technician_id and "technician" not in initial:
@@ -96,6 +111,22 @@ class WorkOrderScheduleForm(forms.Form):
         self.fields["technician"].queryset = Technician.objects.filter(
             active=True,
         ).order_by("first_name", "last_name")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        reason = (cleaned_data.get("reschedule_reason") or "").strip()
+        cleaned_data["reschedule_reason"] = reason
+
+        new_date = cleaned_data.get("scheduled_date")
+        current_date = (
+            self.work_order.scheduled_date if self.work_order is not None else None
+        )
+        if current_date and new_date and new_date != current_date and not reason:
+            self.add_error(
+                "reschedule_reason",
+                RESCHEDULE_REASON_REQUIRED_MESSAGE,
+            )
+        return cleaned_data
 
 
 class WorkOrderFilterForm(forms.Form):

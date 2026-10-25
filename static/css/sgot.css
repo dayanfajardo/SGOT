@@ -820,6 +820,11 @@ a.sgot-btn-danger {
     resize: vertical;
 }
 
+.sgot-form textarea.sgot-textarea-compact {
+    min-height: 4rem;
+    height: 4rem;
+}
+
 .sgot-form input:focus,
 .sgot-form input:focus-visible,
 .sgot-form select:focus,

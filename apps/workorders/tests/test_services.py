@@ -259,6 +259,7 @@ class WorkOrderServiceTests(TestCase):
             technician=self.technician,
             scheduled_date=date(2026, 9, 27),
             actor=self.user,
+            reschedule_reason="Ajuste de agenda",
         )
 
         self.assertTrue(
@@ -267,6 +268,118 @@ class WorkOrderServiceTests(TestCase):
                 event_type=WorkOrderHistory.EventType.RESCHEDULED,
             ).exists()
         )
+
+    def test_initial_schedule_with_empty_reason_is_valid(self):
+        work_order = self._create_work_order(
+            number="8002",
+            status=WorkOrder.Status.EQUIPMENT_OK,
+        )
+        scheduled_date = date(2026, 9, 25)
+
+        schedule_work_order(
+            work_order=work_order,
+            technician=self.technician,
+            scheduled_date=scheduled_date,
+            actor=self.user,
+            reschedule_reason="",
+        )
+
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.scheduled_date, scheduled_date)
+        history = WorkOrderHistory.objects.get(
+            work_order=work_order,
+            event_type=WorkOrderHistory.EventType.SCHEDULED,
+        )
+        self.assertNotIn("Motivo:", history.description)
+
+    def test_changing_date_without_reason_is_rejected(self):
+        previous_date = date(2026, 9, 25)
+        work_order = self._create_work_order(
+            number="8003",
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            technician=self.technician,
+            scheduled_date=previous_date,
+        )
+
+        with self.assertRaises(ValidationError) as raised:
+            schedule_work_order(
+                work_order=work_order,
+                technician=self.technician,
+                scheduled_date=date(2026, 9, 27),
+                actor=self.user,
+            )
+
+        self.assertIn(
+            "Debe indicar el motivo de la reprogramación.",
+            raised.exception.messages,
+        )
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.scheduled_date, previous_date)
+        self.assertFalse(
+            WorkOrderHistory.objects.filter(
+                work_order=work_order,
+                event_type=WorkOrderHistory.EventType.RESCHEDULED,
+            ).exists()
+        )
+
+    def test_reschedule_with_reason_keeps_dates_and_description(self):
+        previous_date = date(2026, 10, 22)
+        new_date = date(2026, 10, 29)
+        reason = "Cliente solicitó aplazamiento"
+        work_order = self._create_work_order(
+            number="8004",
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            technician=self.technician,
+            scheduled_date=previous_date,
+        )
+
+        schedule_work_order(
+            work_order=work_order,
+            technician=self.technician,
+            scheduled_date=new_date,
+            actor=self.user,
+            reschedule_reason=reason,
+        )
+
+        history = WorkOrderHistory.objects.get(
+            work_order=work_order,
+            event_type=WorkOrderHistory.EventType.RESCHEDULED,
+        )
+        self.assertEqual(
+            history.previous_value,
+            f"{previous_date} | {self.technician}",
+        )
+        self.assertEqual(
+            history.new_value,
+            f"{new_date} | {self.technician}",
+        )
+        self.assertIn(f"Motivo: {reason}", history.description)
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.scheduled_date, new_date)
+
+    def test_same_date_does_not_require_reschedule_reason(self):
+        scheduled_date = date(2026, 9, 25)
+        work_order = self._create_work_order(
+            number="8005",
+            status=WorkOrder.Status.EQUIPMENT_OK,
+            technician=self.technician,
+            scheduled_date=scheduled_date,
+        )
+
+        with self.assertRaises(ValidationError) as raised:
+            schedule_work_order(
+                work_order=work_order,
+                technician=self.technician,
+                scheduled_date=scheduled_date,
+                actor=self.user,
+            )
+
+        self.assertNotIn(
+            "Debe indicar el motivo de la reprogramación.",
+            raised.exception.messages,
+        )
+        work_order.refresh_from_db()
+        self.assertEqual(work_order.scheduled_date, scheduled_date)
 
     def test_changing_only_technician_creates_history(self):
         work_order = self._create_work_order(

@@ -13,6 +13,19 @@ from .services import (
 
 User = get_user_model()
 
+REQUESTED_QUANTITY_INTEGER_MESSAGE = (
+    "La cantidad solicitada debe ser un número entero mayor o igual a 1."
+)
+
+
+class ProductChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        label = f"{obj.product_code} · {obj.name}"
+        reference = (obj.reference or "").strip()
+        if reference:
+            return f"{label} · Ref: {reference}"
+        return label
+
 
 class WorkOrderCreateForm(forms.ModelForm):
     class Meta:
@@ -48,6 +61,21 @@ class WorkOrderCreateForm(forms.ModelForm):
 
 
 class WorkOrderItemForm(forms.ModelForm):
+    product = ProductChoiceField(
+        queryset=Product.objects.none(),
+        label="Producto",
+    )
+    requested_quantity = forms.IntegerField(
+        min_value=1,
+        label="Cantidad solicitada",
+        widget=forms.NumberInput(attrs={"min": "1", "step": "1"}),
+        error_messages={
+            "invalid": REQUESTED_QUANTITY_INTEGER_MESSAGE,
+            "min_value": REQUESTED_QUANTITY_INTEGER_MESSAGE,
+            "required": REQUESTED_QUANTITY_INTEGER_MESSAGE,
+        },
+    )
+
     class Meta:
         model = WorkOrderItem
         fields = (

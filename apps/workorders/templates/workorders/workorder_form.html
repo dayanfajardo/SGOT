@@ -215,27 +215,26 @@
             }
         }
 
-        function initProductSelect(selectEl) {
-            initSearchableSelect(selectEl, "Buscar producto...");
-        }
-
         function initRowProductSelect(row) {
             if (!row) {
                 return;
             }
-            initProductSelect(getProductSelect(row));
+            initSearchableSelect(getProductSelect(row), "Buscar producto...");
         }
 
         function reindexRows() {
             const rows = tbody.querySelectorAll("tr");
             rows.forEach(function (row, index) {
-                destroyProductSelect(row);
                 row.querySelectorAll("input, select, textarea, label, button").forEach(function (el) {
                     updateElementIndex(el, index);
                 });
-                initRowProductSelect(row);
             });
             totalFormsInput.value = String(rows.length);
+        }
+
+        function rowHasPersistedInstance(row) {
+            const idInput = row.querySelector("input[name$='-id']");
+            return Boolean(idInput && idInput.value);
         }
 
         function markExistingRowDeleted(row) {
@@ -275,12 +274,12 @@
             if (!row) {
                 return;
             }
-            if (row.hasAttribute("data-dynamic-row")) {
+            if (rowHasPersistedInstance(row)) {
+                markExistingRowDeleted(row);
+            } else {
                 destroyProductSelect(row);
                 row.remove();
                 reindexRows();
-            } else {
-                markExistingRowDeleted(row);
             }
         });
     })();
